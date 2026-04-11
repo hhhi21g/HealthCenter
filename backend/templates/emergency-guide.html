@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    body {
+        font-family: "Microsoft YaHei", sans-serif;
+        background: #f5f5f5;
+        margin: 0;
+        padding: 0;
+    }
+
+    .content-wrapper {
+        max-width: 1000px;
+        margin: 2em auto;
+        background: white;
+        padding: 2em;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.08);
+    }
+
+    h1 {
+        color: #e74c3c;
+        font-size: 1.8em;
+        margin-bottom: 1em;
+        border-left: 5px solid #e74c3c;
+        padding-left: 0.5em;
+    }
+
+    h2 {
+        color: #007acc;
+        margin-top: 2em;
+        font-size: 1.4em;
+        border-left: 4px solid #007acc;
+        padding-left: 0.6em;
+    }
+
+    .emergency-item {
+        background: #fcfcfc;
+        border-left: 4px solid #e74c3c;
+        padding: 1em 1.2em;
+        margin-top: 1em;
+        border-radius: 0 8px 8px 0;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .emergency-item h3 {
+        color: #c0392b;
+        margin-bottom: 0.4em;
+        font-size: 1.1em;
+    }
+
+    .emergency-item p {
+        margin-left: 1em;
+        color: #444;
+    }
+
+    .note, .warning {
+        margin: 1.5em 0;
+        padding: 1em 1.2em;
+        border-radius: 6px;
+        font-size: 0.95rem;
+    }
+
+    .note {
+        background: #fffbea;
+        border-left: 4px solid #f39c12;
+    }
+
+    .warning {
+        background: #ffe6e6;
+        border-left: 4px solid #e74c3c;
+    }
+
+    @media screen and (max-width: 768px) {
+        .content-wrapper {
+            margin: 1em;
+            padding: 1.5em;
+        }
+
+        h1 {
+            font-size: 1.4em;
+        }
+
+        h2 {
+            font-size: 1.2em;
+        }
+    }
+</style>
+
+<div class="content-wrapper">
+    <h1>50条常用急救知识</h1>
+
+    <div class="note">
+        <strong>提示：</strong>本页面内容仅供参考，若遇紧急情况请立即拨打120并联系专业人员。
+    </div>
+
+    <h2>一、创伤与出血</h2>
+    <div class="emergency-item">
+        <h3>1. 轻微割伤处理</h3>
+        <p>用生理盐水清洗伤口，碘伏消毒后使用创可贴或无菌敷料包扎。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>2. 动脉出血</h3>
+        <p>血液鲜红且呈喷射状时应立即加压止血，并使用止血带（每30分钟松开1次）后尽快送医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>3. 鼻出血</h3>
+        <p>身体前倾，捏住两侧鼻翼压迫5-10分钟并冷敷鼻梁，避免仰头。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>4. 擦伤</h3>
+        <p>清水冲洗异物，碘伏消毒后使用透气性敷料包扎。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>5. 深部割伤</h3>
+        <p>压迫止血并保持伤口清洁，避免移动患肢，尽快送医。</p>
+    </div>
+
+    <h2>二、烧伤与烫伤</h2>
+    <div class="emergency-item">
+        <h3>6. 烫伤急救</h3>
+        <p>第一时间用流动冷水冲洗伤处15-20分钟，并覆盖干净纱布。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>7. 化学烧伤</h3>
+        <p>立即用大量清水冲洗至少20分钟，避免化学物继续残留。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>8. 油脂烫伤</h3>
+        <p>先冷水冲洗，再敷以干净纱布，严禁揭开起泡部位。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>9. 电击伤</h3>
+        <p>切断电源后检查意识和呼吸，必要时进行CPR并拨打120。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>10. 烧伤分级识别</h3>
+        <p>红肿为一级，起泡为二级，焦痂为三级，重度烧伤必须送医。</p>
+    </div>
+
+    <div class="warning">
+        <strong>警告：</strong>勿将牙膏、酱油等物质涂在烧伤处，这可能加重感染。
+    </div>
+
+    <h2>三、心肺复苏与AED</h2>
+    <div class="emergency-item">
+        <h3>11. 判断意识与呼吸</h3>
+        <p>轻拍肩部并大声呼喊，观察是否有正常呼吸。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>12. CPR基本步骤</h3>
+        <p>确认无意识后立刻拨打120，胸外按压位置为两乳头连线中点，按压频率为100~120次/分钟。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>13. 人工呼吸</h3>
+        <p>确保气道畅通，捏住鼻子，口对口吹气，每次吹气1秒。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>14. 使用AED</h3>
+        <p>打开设备，按语音提示粘贴电极，远离患者进行电击。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>15. CPR按压技巧</h3>
+        <p>双手重叠，掌根用力，垂直向下按压至少5厘米。</p>
+    </div>
+
+    <h2>四、中毒处理</h2>
+    <div class="emergency-item">
+        <h3>16. 食物中毒</h3>
+        <p>立即停止进食，观察是否有呕吐、腹泻症状，及时就医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>17. 一氧化碳中毒</h3>
+        <p>迅速开窗通风，将患者移至通风处并呼叫急救。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>18. 药物误服</h3>
+        <p>保存药物包装，记录服药时间和剂量，尽快送医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>19. 酒精中毒</h3>
+        <p>注意保暖避免呕吐误吸，昏迷者应平卧并拨打急救。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>20. 化学品中毒</h3>
+        <p>避免接触源，立即清洗污染部位，携带毒物信息就医。</p>
+    </div>
+
+    <h2>五、窒息与气道异物</h2>
+    <div class="emergency-item">
+        <h3>21. 异物卡喉</h3>
+        <p>可用“海姆立克”法施压腹部排出异物。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>22. 婴儿异物窒息</h3>
+        <p>俯卧拍背配合胸部按压，保持头低臀高。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>23. 呼吸道哮喘急救</h3>
+        <p>保持通风，协助吸入药物，如无改善应立即就医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>24. 湿毛巾防烟</h3>
+        <p>火灾逃生时用湿毛巾捂口鼻，低姿前行。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>25. 口腔异物急救</h3>
+        <p>避免盲目掏取，若异物可见可使用镊子小心夹出。</p>
+    </div>
+
+    <h2>六、骨折与扭伤</h2>
+    <div class="emergency-item">
+        <h3>26. 骨折固定</h3>
+        <p>用夹板或硬物将患肢固定，避免搬动骨折部位。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>27. 关节扭伤</h3>
+        <p>用冰袋冷敷并抬高患肢，初期避免热敷。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>28. 脱臼处理</h3>
+        <p>不应自行复位，应固定患部立即就医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>29. 脊柱受伤</h3>
+        <p>严禁搬动患者，应保持原位等专业人员处理。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>30. 开放性骨折</h3>
+        <p>加压止血，盖住伤口防感染，尽快送医。</p>
+    </div>
+
+    <!-- 以下继续扩展 -->
+    <h2>七、溺水与昏迷</h2>
+    <div class="emergency-item">
+        <h3>31. 溺水急救</h3>
+        <p>将头部偏向一侧排水，如无呼吸立即进行人工呼吸和CPR。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>32. 昏迷处理</h3>
+        <p>保持呼吸道通畅，将患者置于侧卧位，避免呕吐误吸。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>33. 高热惊厥</h3>
+        <p>保持环境安静，可物理降温，发作时间过长应立即就医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>34. 日射中暑</h3>
+        <p>将患者转移至阴凉处，补充水分，可用湿毛巾擦拭降温。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>35. 低体温</h3>
+        <p>逐渐保暖，避免热水或热敷，及时送医。</p>
+    </div>
+
+    <h2>八、动物咬伤与虫咬</h2>
+    <div class="emergency-item">
+        <h3>36. 狗咬伤</h3>
+        <p>用肥皂水彻底清洗伤口15分钟以上，再用碘伏消毒，尽快接种疫苗。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>37. 蜂蜇伤</h3>
+        <p>用硬卡片刮出毒刺，冷敷减轻肿胀，严重者应就医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>38. 蜱虫叮咬</h3>
+        <p>避免硬拔，应使用镊子缓慢旋转拔除，避免压破虫体。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>39. 蛇咬伤</h3>
+        <p>固定患肢避免活动，不要切开伤口或吸毒液，尽快送医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>40. 海洋动物刺伤</h3>
+        <p>用热水浸泡缓解毒素作用，避免清洗伤口时摩擦。</p>
+    </div>
+
+    <h2>九、其他紧急情况</h2>
+    <div class="emergency-item">
+        <h3>41. 心绞痛</h3>
+        <p>立即休息，含服硝酸甘油，若无缓解应拨打急救。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>42. 高血压急症</h3>
+        <p>保持安静避免情绪激动，就地休息，及时送医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>43. 癫痫发作</h3>
+        <p>保持环境安全，头部侧向，切勿强行按压身体或塞入异物。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>44. 眼部异物</h3>
+        <p>不要揉眼，可用清水轻轻冲洗，若异物深入应就医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>45. 鼻骨骨折</h3>
+        <p>冷敷止血避免压迫，头稍后仰并就医处理。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>46. 指断急救</h3>
+        <p>止血包扎，断指用干净纱布包裹密封冷藏，尽快送医。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>47. 开放性气胸</h3>
+        <p>用密闭材料封住伤口三面开放，避免气体进入胸腔。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>48. 牙齿脱落</h3>
+        <p>将脱落牙齿浸泡于牛奶或生理盐水中，尽快就医植回。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>49. 外耳异物</h3>
+        <p>避免掏挖，可就地侧头震出异物，勿用尖锐物品处理。</p>
+    </div>
+    <div class="emergency-item">
+        <h3>50. 怀疑中风</h3>
+        <p>识别面部歪斜、言语不清、抬手无力，立即拨打120。</p>
+    </div>
+
+    <!-- 示例省略... 最好依次完整添加到50条 -->
+
+    <div class="note">
+        <p><strong>温馨提示：</strong>学习急救知识仅是第一步，建议每年定期参加线下急救演练与课程培训。</p>
+    </div>
+</div>
+
+<!-- ✅ 医学声明页脚 -->
+<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+    <p><strong>医学声明：</strong>本页面内容由健康门户平台整理，仅供健康科普用途，不能替代专业医生诊断。如身体不适请及时就医。
+    </p>
+</footer>
+
+{% endblock %}

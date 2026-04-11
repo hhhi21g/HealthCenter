@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+
+    <title>应用-BMI计算器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+            color: #333;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(100vh - 70px);
+            padding: 20px;
+        }
+
+        .calculator-container {
+            display: flex;
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(30, 87, 153, 0.2);
+            overflow: hidden;
+        }
+
+        .calculator-section {
+            flex: 1;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-section {
+            flex: 1;
+            background: linear-gradient(135deg, #1e5799, #2989d8);
+            color: white;
+            padding: 30px;
+        }
+
+        .calculator-section h1 {
+            color: #1e5799;
+            margin-bottom: 25px;
+            font-size: 2.2rem;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .calculator-section h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 70px;
+            height: 4px;
+            background: linear-gradient(to right, #1e5799, #2989d8);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus {
+            border-color: #2989d8;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(41, 137, 216, 0.2);
+        }
+
+        button.calculate-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #1e5799, #2989d8);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            box-shadow: 0 4px 10px rgba(30, 87, 153, 0.3);
+        }
+
+        button.calculate-btn:hover {
+            background: linear-gradient(to right, #1a4a84, #2472b9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(30, 87, 153, 0.4);
+        }
+
+        .result-container {
+            margin-top: 30px;
+            padding: 25px;
+            background: #f8faff;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e1e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .bmi-value {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 10px 0;
+            color: #1e5799;
+        }
+
+        .bmi-status {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .info-section h2 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .info-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 70px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 2px;
+        }
+
+        .bmi-info {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th {
+            background: rgba(255, 255, 255, 0.2);
+            text-align: left;
+            padding: 12px 15px;
+        }
+
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .formula {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 25px 0;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 900px) {
+            .calculator-container {
+                flex-direction: column;
+                max-width: 600px;
+            }
+
+            .calculator-section, .info-section {
+                padding: 25px;
+            }
+
+            .content {
+                height: auto;
+                padding: 30px 20px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .navbar ul {
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .navbar .logo {
+                margin-bottom: 15px;
+            }
+
+            .calculator-section h1, .info-section h2 {
+                font-size: 1.8rem;
+            }
+
+            .bmi-value {
+                font-size: 2.8rem;
+            }
+
+            .formula {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- ✅ 顶部导航栏 -->
+<div class="navbar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="logo">健康大数据门户</div>
+
+        {% if session.get('username') and has_health_risk %}
+        <div class="health-alert" title="检测结果异常">
+            ⚠️ 健康预警：
+            {% set issues = [] %}
+            {% if user_status.chest_result != '无病' %}
+            {% set _ = issues.append('胸部疾病') %}
+            {% endif %}
+            {% if user_status.diabetes_result == 1 %}
+            {% set _ = issues.append('糖尿病') %}
+            {% endif %}
+            {% if user_status.heart_result == 1 %}
+            {% set _ = issues.append('心脏病') %}
+            {% endif %}
+            {{ issues | join('、') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 40px;">
+        <div class="nav-links">
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/news">新闻中心</a></li>
+                <li><a href="/notice">通知公告</a></li>
+                <li><a href="/application">应用中心</a></li>
+                <li><a href="/policy">卫生政策</a></li>
+                <li><a href="/knowledge">健康知识</a></li>
+                <li><a href="/about">关于我们</a></li>
+            </ul>
+        </div>
+
+        <div class="auth-section">
+            {% if session.get('username') %}
+            <div class="user-info" onclick="toggleLogout()" style="position: relative; cursor: pointer;">
+                <div style="color: #fff;">欢迎，{{ session['username'] }}</div>
+                <a id="logout-button" href="/logout"
+                   style="display: none; position: absolute; top: 100%; right: 0; background: #fff; color: #333; padding: 5px 10px; border-radius: 4px; margin-top: 4px; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                    退出
+                </a>
+            </div>
+            {% else %}
+            <div style="display: flex; gap: 10px;">
+                <a href="/login">登录</a>
+                <a href="/register">注册</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+
+<div class="content">
+    <div class="calculator-container">
+        <div class="calculator-section">
+            <h1>BMI 计算器</h1>
+
+            <div class="input-group">
+                <label for="height">身高 (cm)</label>
+                <input type="number" id="height" placeholder="例如：175">
+            </div>
+
+            <div class="input-group">
+                <label for="weight">体重 (kg)</label>
+                <input type="number" id="weight" placeholder="例如：70">
+            </div>
+
+            <button class="calculate-btn" onclick="calculateBMI()">计算 BMI</button>
+
+            <div class="result-container" id="result">
+                <p>您的BMI指数：</p>
+                <div class="bmi-value" id="bmi-value">--</div>
+                <div class="bmi-status" id="bmi-status">等待计算</div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <h2>BMI 健康知识</h2>
+
+            <div class="formula">
+                BMI = 体重(kg) ÷ 身高²(m²)
+            </div>
+
+            <div class="bmi-info">
+                <p>身体质量指数（BMI）是国际上常用的衡量人体胖瘦程度以及是否健康的一个标准。</p>
+            </div>
+
+            <h3>BMI 分类标准</h3>
+            <table>
+                <tr>
+                    <th>BMI范围</th>
+                    <th>分类</th>
+                </tr>
+                <tr>
+                    <td>&lt; 18.5</td>
+                    <td>体重过轻</td>
+                </tr>
+                <tr>
+                    <td>18.5 - 24.9</td>
+                    <td>正常范围</td>
+                </tr>
+                <tr>
+                    <td>25.0 - 29.9</td>
+                    <td>超重</td>
+                </tr>
+                <tr>
+                    <td>≥ 30.0</td>
+                    <td>肥胖</td>
+                </tr>
+            </table>
+
+            <div class="bmi-info" style="margin-top: 25px;">
+                <p>注意：BMI
+                    是评估体重健康的常用标准，但无法区分肌肉和脂肪比例。运动员或肌肉发达者可能需要结合其他指标评估。</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    function calculateBMI() {
+        const heightInput = document.getElementById('height');
+        const weightInput = document.getElementById('weight');
+        const resultContainer = document.getElementById('result');
+        const bmiValue = document.getElementById('bmi-value');
+        const bmiStatus = document.getElementById('bmi-status');
+
+        const height = parseFloat(heightInput.value);
+        const weight = parseFloat(weightInput.value);
+
+        // 验证输入
+        if (!height || !weight || height <= 0 || weight <= 0) {
+            bmiValue.textContent = '--';
+            bmiStatus.textContent = '请输入有效的数值';
+            bmiStatus.style.background = '#ff6b6b';
+            return;
+        }
+
+        // 计算BMI
+        const heightInMeters = height / 100;
+        const bmi = weight / (heightInMeters * heightInMeters);
+        const roundedBmi = bmi.toFixed(1);
+
+        // 显示结果
+        bmiValue.textContent = roundedBmi;
+
+        // 确定BMI状态
+        let status = '';
+        let statusColor = '';
+
+        if (bmi < 18.5) {
+            status = '体重过轻';
+            statusColor = '#4dabf7';
+        } else if (bmi < 25) {
+            status = '正常范围';
+            statusColor = '#40c057';
+        } else if (bmi < 30) {
+            status = '超重';
+            statusColor = '#fab005';
+        } else {
+            status = '肥胖';
+            statusColor = '#fa5252';
+        }
+
+        bmiStatus.textContent = status;
+        bmiStatus.style.background = statusColor;
+
+        // 添加动画效果
+        resultContainer.style.animation = 'none';
+        setTimeout(() => {
+            resultContainer.style.animation = 'pulse 0.5s';
+        }, 10);
+    }
+
+    // 添加输入框回车支持
+    document.getElementById('height').addEventListener('keyup', function (event) {
+        if (event.key === 'Enter') {
+            calculateBMI();
+        }
+    });
+
+    document.getElementById('weight').addEventListener('keyup', function (event) {
+        if (event.key === 'Enter') {
+            calculateBMI();
+        }
+    });
+
+    // 初始示例值
+    document.getElementById('height').value = '175';
+    document.getElementById('weight').value = '70';
+</script>
+<!-- ✅ 医学声明页脚 -->
+<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+    <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。</p>
+</footer>
+
+</body>
+</html>

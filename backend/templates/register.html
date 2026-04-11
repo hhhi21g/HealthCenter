@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>用户注册 - 健康大数据门户</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(to right, #eef6fb, #dceeff);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 400px;
+            margin: 80px auto;
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(30, 87, 153, 0.2);
+        }
+
+        h2 {
+            text-align: center;
+            color: #1e5799;
+            margin-bottom: 30px;
+        }
+
+        form label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        form input[type="text"],
+        form input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(to right, #1e5799, #2989d8);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #164a8a, #2572be);
+        }
+
+        .message {
+            text-align: center;
+            margin-top: 15px;
+            color: red;
+        }
+
+        .to-login {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.95rem;
+        }
+
+        .to-login a {
+            color: #1e5799;
+            text-decoration: none;
+        }
+
+        .to-login a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo">健康大数据门户</div>
+    <ul>
+        <li><a href="/">首页</a></li>
+        <li><a href="/news">新闻中心</a></li>
+        <li><a href="/notice">通知公告</a></li>
+        <li><a href="/application">应用中心</a></li>
+        <li><a href="/policy">卫生政策</a></li>
+        <li><a href="/knowledge">健康知识</a></li>
+        <li><a href="/about">关于我们</a></li>
+    </ul>
+</div>
+
+<div class="container">
+    <h2>用户注册</h2>
+    <form method="POST" action="/register">
+        <label for="username">用户名</label>
+        <input type="text" name="username" id="username" required>
+
+        <label for="password">密码</label>
+        <input type="password" name="password" id="password" required>
+
+        <label for="confirm">确认密码</label>
+        <input type="password" name="confirm" id="confirm" required>
+
+        <button type="submit">注册</button>
+
+        {% if message %}
+        <div class="message">{{ message }}</div>
+        {% endif %}
+    </form>
+
+    <div class="to-login">
+        已有账号？<a href="/login">前往登录</a>
+    </div>
+</div>
+</body>
+</html>

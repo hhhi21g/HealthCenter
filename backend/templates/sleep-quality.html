@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <title>应用-睡眠质量评估器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+            color: #333;
+            min-height: 100vh;
+        }
+
+        .content-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: calc(100vh - 70px);
+            padding: 20px;
+        }
+
+        .content {
+            display: flex;
+            justify-content: center;
+            align-items: stretch;
+            max-width: 1200px;
+            width: 100%;
+            gap: 30px;
+        }
+
+        .calculator-container {
+            width: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(30, 87, 153, 0.2);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .info-sidebar {
+            width: 400px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 30px rgba(30, 87, 153, 0.2);
+            padding: 30px;
+            align-self: center;
+        }
+
+        h1, h2 {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #1e5799;
+            font-size: 2rem;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, #1e5799, #2989d8);
+            border-radius: 2px;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            color: #1e5799;
+        }
+
+        h2::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background: rgba(30, 87, 153, 0.5);
+            border-radius: 2px;
+        }
+
+        .input-group {
+            margin-bottom: 18px;
+            width: 48%;
+            display: inline-block;
+            vertical-align: top;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e5eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        input:focus, select:focus {
+            border-color: #2989d8;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(41, 137, 216, 0.2);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(to right, #1e5799, #2989d8);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(30, 87, 153, 0.3);
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #1a4a84, #2472b9);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(30, 87, 153, 0.4);
+        }
+
+        .result-container {
+            margin-top: 25px;
+            padding: 20px;
+            background: #f8faff;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e1e8f0;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .score-value {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 10px 0;
+            color: #1e5799;
+            line-height: 1.1;
+        }
+
+        .score-status {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-top: 10px;
+            padding: 8px 20px;
+            border-radius: 30px;
+            display: inline-block;
+        }
+
+        .waiting-text {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .formula {
+            background: rgba(30, 87, 153, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: rgba(30, 87, 153, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th {
+            background: rgba(30, 87, 153, 0.1);
+            text-align: left;
+            padding: 12px 15px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #1e5799;
+        }
+
+        td {
+            padding: 10px 15px;
+            border-bottom: 1px solid rgba(30, 87, 153, 0.1);
+            font-size: 0.9rem;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-indicator.good {
+            background: #40c057;
+        }
+
+        .status-indicator.fair {
+            background: #fab005;
+        }
+
+        .status-indicator.poor {
+            background: #fa5252;
+        }
+
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @media (max-width: 1200px) {
+            .content {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .calculator-container, .info-sidebar {
+                width: 100%;
+                max-width: 800px;
+            }
+
+            .info-sidebar {
+                margin-top: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                width: 100%;
+            }
+
+            .calculator-container, .info-sidebar {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- ✅ 顶部导航栏 -->
+<div class="navbar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="logo">健康大数据门户</div>
+
+        {% if session.get('username') and has_health_risk %}
+        <div class="health-alert" title="检测结果异常">
+            ⚠️ 健康预警：
+            {% set issues = [] %}
+            {% if user_status.chest_result != '无病' %}
+            {% set _ = issues.append('胸部疾病') %}
+            {% endif %}
+            {% if user_status.diabetes_result == 1 %}
+            {% set _ = issues.append('糖尿病') %}
+            {% endif %}
+            {% if user_status.heart_result == 1 %}
+            {% set _ = issues.append('心脏病') %}
+            {% endif %}
+            {{ issues | join('、') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 40px;">
+        <div class="nav-links">
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/news">新闻中心</a></li>
+                <li><a href="/notice">通知公告</a></li>
+                <li><a href="/application">应用中心</a></li>
+                <li><a href="/policy">卫生政策</a></li>
+                <li><a href="/knowledge">健康知识</a></li>
+                <li><a href="/about">关于我们</a></li>
+            </ul>
+        </div>
+
+        <div class="auth-section">
+            {% if session.get('username') %}
+            <div class="user-info" onclick="toggleLogout()" style="position: relative; cursor: pointer;">
+                <div style="color: #fff;">欢迎，{{ session['username'] }}</div>
+                <a id="logout-button" href="/logout"
+                   style="display: none; position: absolute; top: 100%; right: 0; background: #fff; color: #333; padding: 5px 10px; border-radius: 4px; margin-top: 4px; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
+                    退出
+                </a>
+            </div>
+            {% else %}
+            <div style="display: flex; gap: 10px;">
+                <a href="/login">登录</a>
+                <a href="/register">注册</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="content">
+        <div class="calculator-container">
+            <h1>睡眠质量评估器</h1>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>昨晚睡眠时长(小时)</label>
+                    <input type="number" id="sleep-duration" placeholder="例如：7.5" min="0" max="24" step="0.5">
+                </div>
+
+                <div class="input-group">
+                    <label>入睡所需时间(分钟)</label>
+                    <input type="number" id="sleep-latency" placeholder="例如：15" min="0" max="180">
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>夜间醒来次数</label>
+                    <input type="number" id="awakenings" placeholder="例如：2" min="0" max="20">
+                </div>
+
+                <div class="input-group">
+                    <label>早晨醒来感觉</label>
+                    <select id="morning-feeling">
+                        <option value="3">精力充沛</option>
+                        <option value="2" selected>一般</option>
+                        <option value="1">疲惫</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="input-row">
+                <div class="input-group">
+                    <label>白天状态</label>
+                    <select id="daytime-function">
+                        <option value="3">非常清醒</option>
+                        <option value="2" selected>一般</option>
+                        <option value="1">困倦</option>
+                    </select>
+                </div>
+
+                <div class="input-group">
+                    <label>睡眠满意度</label>
+                    <select id="satisfaction">
+                        <option value="3">非常满意</option>
+                        <option value="2" selected>一般</option>
+                        <option value="1">不满意</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="calculateSleepQuality()">评估睡眠质量</button>
+
+            <div class="result-container" id="result">
+                <p>您的睡眠质量评分为：</p>
+                <div class="waiting-text" id="waiting-text">--</div>
+                <div class="score-value" id="score-value" style="display: none;"></div>
+                <div class="score-status" id="score-status" style="display: none;"></div>
+            </div>
+        </div>
+
+        <div class="info-sidebar">
+            <h2>睡眠质量评估说明</h2>
+
+            <div class="formula">
+                睡眠时长(0-3分) + 入睡时间(0-3分) + 醒来次数(0-3分) +
+                早晨感觉(1-3分) + 白天状态(1-3分) + 满意度(1-3分)
+            </div>
+
+            <h3>评分标准</h3>
+            <table>
+                <tr>
+                    <th>评估项目</th>
+                    <th>评分标准</th>
+                </tr>
+                <tr>
+                    <td>睡眠时长</td>
+                    <td>
+                        ≥7小时: 3分<br>
+                        6-7小时: 2分<br>
+                        5-6小时: 1分<br>
+                        &lt;5小时: 0分
+                    </td>
+                </tr>
+                <tr>
+                    <td>入睡时间</td>
+                    <td>
+                        ≤15分钟: 3分<br>
+                        16-30分钟: 2分<br>
+                        31-45分钟: 1分<br>
+                        &gt;45分钟: 0分
+                    </td>
+                </tr>
+                <tr>
+                    <td>夜间醒来</td>
+                    <td>
+                        0次: 3分<br>
+                        1次: 2分<br>
+                        2次: 1分<br>
+                        ≥3次: 0分
+                    </td>
+                </tr>
+            </table>
+
+            <h3 style="margin-top: 20px;">评估结果</h3>
+            <table>
+                <tr>
+                    <th>总分范围</th>
+                    <th>睡眠质量</th>
+                </tr>
+                <tr>
+                    <td>14-18分</td>
+                    <td><span class="status-indicator good"></span> 优秀</td>
+                </tr>
+                <tr>
+                    <td>10-13分</td>
+                    <td><span class="status-indicator fair"></span> 一般</td>
+                </tr>
+                <tr>
+                    <td>0-9分</td>
+                    <td><span class="status-indicator poor"></span> 较差</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 输入框回车支持
+    document.getElementById('sleep-duration').addEventListener('keyup', function (event) {
+        if (event.key === 'Enter') {
+            calculateSleepQuality();
+        }
+    });
+
+    function calculateSleepQuality() {
+        const duration = parseFloat(document.getElementById('sleep-duration').value);
+        const latency = parseInt(document.getElementById('sleep-latency').value) || 0;
+        const awakenings = parseInt(document.getElementById('awakenings').value) || 0;
+        const morningFeeling = parseInt(document.getElementById('morning-feeling').value);
+        const daytimeFunction = parseInt(document.getElementById('daytime-function').value);
+        const satisfaction = parseInt(document.getElementById('satisfaction').value);
+
+        const waitingText = document.getElementById('waiting-text');
+        const scoreValue = document.getElementById('score-value');
+        const scoreStatus = document.getElementById('score-status');
+
+        // 验证输入
+        if (isNaN(duration)) {
+            waitingText.textContent = '请输入睡眠时长';
+            scoreValue.style.display = 'none';
+            scoreStatus.style.display = 'none';
+            waitingText.style.display = 'block';
+            return;
+        }
+
+        // 计算各项得分
+        let durationScore = 0;
+        if (duration >= 7) durationScore = 3;
+        else if (duration >= 6) durationScore = 2;
+        else if (duration >= 5) durationScore = 1;
+
+        let latencyScore = 0;
+        if (latency <= 15) latencyScore = 3;
+        else if (latency <= 30) latencyScore = 2;
+        else if (latency <= 45) latencyScore = 1;
+
+        let awakeningsScore = 0;
+        if (awakenings === 0) awakeningsScore = 3;
+        else if (awakenings === 1) awakeningsScore = 2;
+        else if (awakenings === 2) awakeningsScore = 1;
+
+        // 计算总分
+        const totalScore = durationScore + latencyScore + awakeningsScore +
+            morningFeeling + daytimeFunction + satisfaction;
+
+        // 显示结果
+        waitingText.style.display = 'none';
+        scoreValue.textContent = totalScore;
+        scoreValue.style.display = 'block';
+
+        // 评估结果
+        let statusText, statusClass, indicatorClass;
+        if (totalScore >= 14) {
+            statusText = "优秀 - 您的睡眠质量很好";
+            statusClass = "background: #d4edda; color: #155724;";
+            indicatorClass = "good";
+        } else if (totalScore >= 10) {
+            statusText = "一般 - 您的睡眠质量尚可";
+            statusClass = "background: #fff3cd; color: #856404;";
+            indicatorClass = "fair";
+        } else {
+            statusText = "较差 - 建议改善睡眠习惯";
+            statusClass = "background: #f8d7da; color: #721c24;";
+            indicatorClass = "poor";
+        }
+
+        scoreStatus.innerHTML = `<span class="status-indicator ${indicatorClass}"></span> ${statusText}`;
+        scoreStatus.style = statusClass;
+        scoreStatus.style.display = 'block';
+
+        // 添加动画效果
+        const resultContainer = document.getElementById('result');
+        resultContainer.style.animation = 'none';
+        setTimeout(() => {
+            resultContainer.style.animation = 'pulse 0.6s';
+        }, 10);
+    }
+
+    // 初始示例值
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('sleep-duration').value = '7.5';
+        document.getElementById('sleep-latency').value = '15';
+        document.getElementById('awakenings').value = '2';
+    });
+</script>
+<!-- ✅ 医学声明页脚 -->
+<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+    <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。</p>
+</footer>
+
+</body>
+</html>
