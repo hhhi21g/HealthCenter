@@ -6,9 +6,9 @@ from wordcloud import WordCloud
 
 # 1. 数据库配置
 db_config = {
-    'host': '212.129.223.4',
+    'host': '119.3.163.155',
     'user': 'root',
-    'password': 'nineone4536251',
+    'password': 'HealthApp_2026!',
     'database': 'health',
     'charset': 'utf8mb4'
 }

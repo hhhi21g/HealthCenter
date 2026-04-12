@@ -83,12 +83,33 @@
 
     .card-title {
         font-size: 1.5em;
-        margin-bottom: 0.8em;
+        margin: 0;
         border-left: 4px solid #007acc;
         padding-left: 0.5em;
         color: #007acc;
         font-weight: bold;
         cursor: pointer;
+    }
+
+    .card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1em;
+        margin-bottom: 0.8em;
+    }
+
+    .card-more {
+        color: #007acc;
+        font-size: 0.92rem;
+        text-decoration: none;
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+
+    .card-more:hover {
+        color: #005fa3;
+        text-decoration: underline;
     }
 
     .card-list {
@@ -128,7 +149,263 @@
         box-sizing: border-box;
     }
 
+    .dashboard-section {
+        margin: 2.5em 2em 1.5em;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.12);
+        padding: 1.5em;
+    }
+
+    .dashboard-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 1em;
+        margin-bottom: 1.3em;
+    }
+
+    .dashboard-heading h2 {
+        margin: 0;
+        color: #007acc;
+        font-size: 1.6rem;
+        border-left: 4px solid #007acc;
+        padding-left: 0.5em;
+    }
+
+    .dashboard-heading p {
+        margin: 0.4em 0 0;
+        color: #666;
+        font-size: 0.95rem;
+    }
+
+    .dashboard-range {
+        color: #666;
+        font-size: 0.95rem;
+        white-space: nowrap;
+    }
+
+    .dashboard-meta {
+        color: #666;
+        display: grid;
+        gap: 0.25em;
+        font-size: 0.92rem;
+        justify-items: end;
+        line-height: 1.5;
+        text-align: right;
+    }
+
+    .dashboard-summary {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1em;
+        margin-bottom: 1.3em;
+    }
+
+    .dashboard-metric {
+        border: 1px solid #e5edf3;
+        border-radius: 8px;
+        padding: 1em;
+        background: #f8fbfd;
+        min-height: 92px;
+    }
+
+    .dashboard-metric-label {
+        color: #58636d;
+        font-size: 0.95rem;
+        margin-bottom: 0.4em;
+    }
+
+    .dashboard-metric-value {
+        color: #1f2d3d;
+        font-size: 2rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .dashboard-metric-date {
+        color: #81909c;
+        font-size: 0.85rem;
+        margin-top: 0.4em;
+    }
+
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        gap: 1em;
+        margin-bottom: 1.3em;
+    }
+
+    .dashboard-panel,
+    .dashboard-latest {
+        border: 1px solid #e5edf3;
+        border-radius: 8px;
+        background: #fff;
+        padding: 1em;
+    }
+
+    .dashboard-panel-title,
+    .dashboard-latest-title {
+        color: #1f2d3d;
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 0.8em;
+    }
+
+    .dashboard-panel-header,
+    .dashboard-latest-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1em;
+        margin-bottom: 0.8em;
+    }
+
+    .dashboard-panel-header .dashboard-panel-title,
+    .dashboard-latest-header .dashboard-latest-title {
+        margin-bottom: 0;
+    }
+
+    .dashboard-toggle,
+    .dashboard-filter {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5em;
+        justify-content: flex-end;
+    }
+
+    .dashboard-toggle button,
+    .dashboard-filter button {
+        border: 1px solid #d6e4ef;
+        background: #fff;
+        color: #58636d;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.88rem;
+        padding: 0.35em 0.7em;
+        transition: all 0.2s ease;
+    }
+
+    .dashboard-toggle button:hover,
+    .dashboard-filter button:hover,
+    .dashboard-toggle button.active,
+    .dashboard-filter button.active {
+        background: #007acc;
+        border-color: #007acc;
+        color: #fff;
+    }
+
+    .dashboard-chart {
+        width: 100%;
+        height: 320px;
+    }
+
+    .dashboard-empty,
+    .dashboard-error {
+        display: none;
+        color: #777;
+        background: #f7f7f7;
+        border-radius: 8px;
+        padding: 1em;
+        text-align: center;
+    }
+
+    .dashboard-error {
+        margin-bottom: 1em;
+        color: #b42318;
+        background: #fff1f0;
+    }
+
+    .dashboard-latest-list {
+        display: grid;
+        gap: 0.75em;
+    }
+
+    .dashboard-latest-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 0.75em;
+        border-bottom: 1px solid #edf2f6;
+        padding-bottom: 0.75em;
+    }
+
+    .dashboard-latest-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+    .dashboard-tag {
+        color: #fff;
+        background: #007acc;
+        border-radius: 4px;
+        padding: 0.25em 0.55em;
+        font-size: 0.82rem;
+        white-space: nowrap;
+    }
+
+    .dashboard-latest-item a {
+        color: #333;
+        text-decoration: none;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    .dashboard-latest-item a:hover {
+        color: #007acc;
+    }
+
+    .dashboard-latest-date {
+        color: #81909c;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+
     @media (max-width: 768px) {
+        .dashboard-section {
+            margin: 1.5em 1em;
+            padding: 1em;
+        }
+
+        .dashboard-heading {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dashboard-meta {
+            justify-items: start;
+            text-align: left;
+        }
+
+        .dashboard-panel-header,
+        .dashboard-latest-header {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .dashboard-toggle,
+        .dashboard-filter {
+            justify-content: flex-start;
+        }
+
+        .dashboard-summary,
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-chart {
+            height: 280px;
+        }
+
+        .dashboard-latest-item {
+            grid-template-columns: auto minmax(0, 1fr);
+        }
+
+        .dashboard-latest-date {
+            grid-column: 2;
+        }
+
         .card-row .card-section {
             flex: 1 1 100%;
             max-width: 100%;
@@ -158,6 +435,58 @@
     <div class="carousel-right" id="carousel-titles"></div>
 </div>
 
+<!-- 健康数据驾驶舱 -->
+<section class="dashboard-section" aria-labelledby="dashboard-title">
+    <div class="dashboard-heading">
+        <div>
+            <h2 id="dashboard-title">健康数据总览</h2>
+            <p>汇聚新闻、政策、知识与公告内容，观察近期健康资讯态势。</p>
+        </div>
+        <div class="dashboard-meta">
+            <div>数据来源：新闻、政策、知识、公告</div>
+            <div id="dashboard-updated-at">最新更新：--</div>
+            <div>统计范围：最近 30 天</div>
+        </div>
+    </div>
+
+    <div class="dashboard-error" id="dashboard-error"></div>
+    <div class="dashboard-summary" id="dashboard-summary"></div>
+
+    <div class="dashboard-grid">
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-header">
+                <div class="dashboard-panel-title">内容发布趋势</div>
+                <div class="dashboard-toggle" aria-label="切换趋势图类型">
+                    <button type="button" class="active" data-chart-type="line">折线图</button>
+                    <button type="button" data-chart-type="bar">柱状图</button>
+                </div>
+            </div>
+            <div class="dashboard-chart" id="dashboard-trend-chart"></div>
+            <div class="dashboard-empty" id="dashboard-trend-empty">最近 30 天暂无可统计的发布时间数据</div>
+        </div>
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-title">内容类型占比</div>
+            <div class="dashboard-chart" id="dashboard-distribution-chart"></div>
+            <div class="dashboard-empty" id="dashboard-distribution-empty">暂无内容占比数据</div>
+        </div>
+    </div>
+
+    <div class="dashboard-latest">
+        <div class="dashboard-latest-header">
+            <div class="dashboard-latest-title">最新内容快讯</div>
+            <div class="dashboard-filter" aria-label="筛选最新内容">
+                <button type="button" class="active" data-latest-type="all">全部</button>
+                <button type="button" data-latest-type="news">新闻</button>
+                <button type="button" data-latest-type="policy">政策</button>
+                <button type="button" data-latest-type="knowledges">知识</button>
+                <button type="button" data-latest-type="notice">公告</button>
+            </div>
+        </div>
+        <div class="dashboard-latest-list" id="dashboard-latest-list"></div>
+        <div class="dashboard-empty" id="dashboard-latest-empty">暂无最新内容</div>
+    </div>
+</section>
+
 <!-- 词云图片悬浮容器 -->
 <div id="hover-image-preview">
     <img id="hover-image" src="">
@@ -166,27 +495,40 @@
 <!-- 四大卡片 -->
 <div class="card-row">
     <div class="card-section">
-        <h2 class="card-title" data-type="news">新闻中心</h2>
+        <div class="card-header">
+            <h2 class="card-title" data-type="news">新闻中心</h2>
+            <a class="card-more" href="/news">更多&gt;&gt;</a>
+        </div>
         <ul class="card-list" id="home-news-list"></ul>
     </div>
     <div class="card-section">
-        <h2 class="card-title" data-type="policy">卫生政策</h2>
+        <div class="card-header">
+            <h2 class="card-title" data-type="policy">卫生政策</h2>
+            <a class="card-more" href="/policy">更多&gt;&gt;</a>
+        </div>
         <ul class="card-list" id="home-policy-list"></ul>
     </div>
 </div>
 
 <div class="card-row">
     <div class="card-section">
-        <h2 class="card-title" data-type="knowledges">健康知识库</h2>
+        <div class="card-header">
+            <h2 class="card-title" data-type="knowledges">健康知识库</h2>
+            <a class="card-more" href="/knowledge">更多&gt;&gt;</a>
+        </div>
         <ul class="card-list" id="home-knowledge-list"></ul>
     </div>
     <div class="card-section">
-        <h2 class="card-title" data-type="notice">通知公告</h2>
+        <div class="card-header">
+            <h2 class="card-title" data-type="notice">通知公告</h2>
+            <a class="card-more" href="/notice">更多&gt;&gt;</a>
+        </div>
         <ul class="card-list" id="home-notice-list"></ul>
     </div>
 </div>
 
 <!-- 数据填充脚本 -->
+<script src="{{ url_for('static', filename='vendor/echarts.min.js') }}"></script>
 <script>
     function parseJsonResponse(response) {
         return response.text().then(text => {
@@ -202,6 +544,241 @@
             return data;
         });
     }
+
+    const dashboardColors = {
+        news: '#007acc',
+        policy: '#2ca58d',
+        knowledges: '#f59f00',
+        notice: '#8a63d2'
+    };
+    let dashboardTrendChart = null;
+    let dashboardDistributionChart = null;
+    let dashboardTrendData = null;
+    let dashboardTrendType = 'line';
+    let dashboardLatestItems = {all: []};
+    let dashboardLatestType = 'all';
+
+    function showDashboardEmpty(id, visible) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.style.display = visible ? 'block' : 'none';
+        }
+    }
+
+    function renderDashboardSummary(items) {
+        const container = document.getElementById('dashboard-summary');
+        container.innerHTML = '';
+
+        items.forEach(item => {
+            const metric = document.createElement('div');
+            metric.className = 'dashboard-metric';
+
+            const label = document.createElement('div');
+            label.className = 'dashboard-metric-label';
+            label.textContent = item.label;
+
+            const value = document.createElement('div');
+            value.className = 'dashboard-metric-value';
+            value.textContent = Number(item.total || 0).toLocaleString('zh-CN');
+
+            const date = document.createElement('div');
+            date.className = 'dashboard-metric-date';
+            date.textContent = item.latest_date ? `最新更新：${item.latest_date}` : '暂无更新时间';
+
+            metric.appendChild(label);
+            metric.appendChild(value);
+            metric.appendChild(date);
+            container.appendChild(metric);
+        });
+    }
+
+    function renderDashboardUpdatedAt(updatedAt) {
+        const element = document.getElementById('dashboard-updated-at');
+        element.textContent = updatedAt ? `最新更新：${updatedAt}` : '最新更新：暂无';
+    }
+
+    function renderTrendChart(trend) {
+        const hasData = trend.series.some(series => series.data.some(value => value > 0));
+        showDashboardEmpty('dashboard-trend-empty', !hasData);
+        document.getElementById('dashboard-trend-chart').style.display = hasData ? 'block' : 'none';
+
+        if (!hasData || typeof echarts === 'undefined') {
+            return null;
+        }
+
+        if (!dashboardTrendChart) {
+            dashboardTrendChart = echarts.init(document.getElementById('dashboard-trend-chart'));
+        }
+
+        dashboardTrendChart.setOption({
+            color: trend.series.map(series => dashboardColors[series.key] || '#007acc'),
+            tooltip: {trigger: 'axis'},
+            legend: {
+                top: 0,
+                data: trend.series.map(series => series.label)
+            },
+            grid: {
+                left: 40,
+                right: 18,
+                top: 54,
+                bottom: 36
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: dashboardTrendType === 'bar',
+                data: trend.dates,
+                axisLabel: {
+                    formatter: value => value.slice(5)
+                }
+            },
+            yAxis: {
+                type: 'value',
+                minInterval: 1
+            },
+            series: trend.series.map(series => ({
+                name: series.label,
+                type: dashboardTrendType,
+                smooth: false,
+                symbolSize: 6,
+                data: series.data,
+                areaStyle: dashboardTrendType === 'line' ? {opacity: 0.08} : undefined,
+                barMaxWidth: dashboardTrendType === 'bar' ? 18 : undefined
+            }))
+        }, true);
+        return dashboardTrendChart;
+    }
+
+    function setTrendChartType(type) {
+        dashboardTrendType = type;
+        document.querySelectorAll('[data-chart-type]').forEach(button => {
+            button.classList.toggle('active', button.dataset.chartType === type);
+        });
+        if (dashboardTrendData) {
+            renderTrendChart(dashboardTrendData);
+        }
+    }
+
+    function renderDistributionChart(distribution) {
+        const hasData = distribution.some(item => item.value > 0);
+        showDashboardEmpty('dashboard-distribution-empty', !hasData);
+        document.getElementById('dashboard-distribution-chart').style.display = hasData ? 'block' : 'none';
+
+        if (!hasData || typeof echarts === 'undefined') {
+            return null;
+        }
+
+        if (!dashboardDistributionChart) {
+            dashboardDistributionChart = echarts.init(document.getElementById('dashboard-distribution-chart'));
+        }
+
+        dashboardDistributionChart.setOption({
+            color: distribution.map(item => dashboardColors[item.key] || '#007acc'),
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}<br/>{c} 条 ({d}%)'
+            },
+            legend: {
+                bottom: 0,
+                data: distribution.map(item => item.label)
+            },
+            series: [{
+                name: '内容占比',
+                type: 'pie',
+                radius: ['48%', '70%'],
+                center: ['50%', '45%'],
+                avoidLabelOverlap: true,
+                label: {
+                    formatter: '{b}\n{d}%'
+                },
+                data: distribution.map(item => ({
+                    name: item.label,
+                    value: item.value
+                }))
+            }]
+        });
+        return dashboardDistributionChart;
+    }
+
+    function renderLatestContent(items) {
+        const list = document.getElementById('dashboard-latest-list');
+        list.innerHTML = '';
+        showDashboardEmpty('dashboard-latest-empty', items.length === 0);
+
+        items.forEach(item => {
+            const row = document.createElement('div');
+            row.className = 'dashboard-latest-item';
+
+            const tag = document.createElement('span');
+            tag.className = 'dashboard-tag';
+            tag.style.background = dashboardColors[item.type] || '#007acc';
+            tag.textContent = item.type_label;
+
+            const link = document.createElement('a');
+            link.href = item.url || '#';
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            link.title = item.title;
+            link.textContent = item.title;
+
+            const date = document.createElement('span');
+            date.className = 'dashboard-latest-date';
+            date.textContent = item.publish_time || '暂无日期';
+
+            row.appendChild(tag);
+            row.appendChild(link);
+            row.appendChild(date);
+            list.appendChild(row);
+        });
+    }
+
+    function setLatestFilter(type) {
+        dashboardLatestType = type;
+        document.querySelectorAll('[data-latest-type]').forEach(button => {
+            button.classList.toggle('active', button.dataset.latestType === type);
+        });
+        renderLatestContent(dashboardLatestItems[type] || []);
+    }
+
+    function initDashboardControls() {
+        document.querySelectorAll('[data-chart-type]').forEach(button => {
+            button.addEventListener('click', () => setTrendChartType(button.dataset.chartType));
+        });
+        document.querySelectorAll('[data-latest-type]').forEach(button => {
+            button.addEventListener('click', () => setLatestFilter(button.dataset.latestType));
+        });
+    }
+
+    function loadDashboard() {
+        const error = document.getElementById('dashboard-error');
+
+        fetch('/api/dashboard/overview')
+            .then(parseJsonResponse)
+            .then(data => {
+                error.style.display = 'none';
+                renderDashboardSummary(data.summary || []);
+                renderDashboardUpdatedAt(data.updated_at);
+
+                dashboardTrendData = data.trend || {dates: [], series: []};
+                renderTrendChart(dashboardTrendData);
+                renderDistributionChart(data.distribution || []);
+
+                dashboardLatestItems = Object.assign({all: data.latest || []}, data.latest_by_type || {});
+                setLatestFilter(dashboardLatestType);
+
+                const resizeCharts = () => {
+                    if (dashboardTrendChart) dashboardTrendChart.resize();
+                    if (dashboardDistributionChart) dashboardDistributionChart.resize();
+                };
+                window.addEventListener('resize', resizeCharts);
+            })
+            .catch(err => {
+                error.textContent = '健康数据总览加载失败：' + err.message;
+                error.style.display = 'block';
+            });
+    }
+
+    initDashboardControls();
+    loadDashboard();
 
     // 轮播图加载
     fetch('/api/home/news')

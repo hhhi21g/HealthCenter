@@ -3,6 +3,7 @@ from flask import Flask, jsonify, render_template, send_from_directory, request,
 import pymysql
 import os
 import sys
+from datetime import date, timedelta
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 from PIL import Image
@@ -78,6 +79,34 @@ def get_carousel_image_url(index):
     return build_static_url(f"carousel/{image_filename}")
 
 
+CONTENT_SOURCES = (
+    {"key": "news", "label": "新闻中心", "table": "news"},
+    {"key": "policy", "label": "卫生政策", "table": "policy"},
+    {"key": "knowledges", "label": "健康知识", "table": "knowledges"},
+    {"key": "notice", "label": "通知公告", "table": "notice"},
+)
+
+
+def format_date_value(value):
+    if value is None:
+        return None
+    if hasattr(value, "strftime"):
+        return value.strftime("%Y-%m-%d")
+    text = str(value)
+    return text[:10] if text else None
+
+
+def build_dashboard_dates(days=30):
+    end_date = date.today()
+    start_date = end_date - timedelta(days=days - 1)
+    dates = []
+    current = start_date
+    while current <= end_date:
+        dates.append(current.strftime("%Y-%m-%d"))
+        current += timedelta(days=1)
+    return start_date, end_date, dates
+
+
 @app.errorhandler(HTTPException)
 def handle_http_error(error):
     if request.path.startswith('/api/'):
@@ -101,6 +130,133 @@ def handle_unexpected_error(error):
         }), 500
 
     raise error
+
+
+@app.route('/api/dashboard/overview')
+def api_dashboard_overview():
+    start_date, end_date, trend_dates = build_dashboard_dates(30)
+    summary = []
+    distribution = []
+    latest_by_type = {}
+    trend_maps = {source["key"]: {day: 0 for day in trend_dates} for source in CONTENT_SOURCES}
+
+    db = get_db_connection()
+    cursor = db.cursor()
+
+    try:
+        for source in CONTENT_SOURCES:
+            cursor.execute(
+                f"SELECT COUNT(*) AS total, MAX(DATE(publish_time)) AS latest_date FROM {source['table']}"
+            )
+            stats = cursor.fetchone() or {}
+            total = int(stats.get("total") or 0)
+            latest_date = format_date_value(stats.get("latest_date"))
+
+            summary.append({
+                "key": source["key"],
+                "label": source["label"],
+                "total": total,
+                "latest_date": latest_date,
+            })
+            distribution.append({
+                "key": source["key"],
+                "label": source["label"],
+                "value": total,
+            })
+
+            cursor.execute(
+                f"""
+                SELECT DATE(publish_time) AS publish_date, COUNT(*) AS total
+                FROM {source['table']}
+                WHERE publish_time IS NOT NULL
+                  AND DATE(publish_time) BETWEEN %s AND %s
+                GROUP BY DATE(publish_time)
+                ORDER BY publish_date
+                """,
+                (start_date, end_date)
+            )
+            for row in cursor.fetchall():
+                publish_date = format_date_value(row.get("publish_date"))
+                if publish_date in trend_maps[source["key"]]:
+                    trend_maps[source["key"]][publish_date] = int(row.get("total") or 0)
+
+            cursor.execute(
+                f"""
+                SELECT title, publish_time, url
+                FROM {source['table']}
+                WHERE title IS NOT NULL AND title <> ''
+                ORDER BY publish_time IS NULL, publish_time DESC
+                LIMIT 5
+                """
+            )
+            latest_by_type[source["key"]] = [
+                {
+                    "type": source["key"],
+                    "type_label": source["label"],
+                    "title": row.get("title"),
+                    "publish_time": format_date_value(row.get("publish_time")),
+                    "url": row.get("url"),
+                }
+                for row in cursor.fetchall()
+            ]
+
+        latest_sql_parts = []
+        for source in CONTENT_SOURCES:
+            latest_sql_parts.append(
+                f"""
+                SELECT
+                    '{source['key']}' AS type,
+                    '{source['label']}' AS type_label,
+                    title,
+                    publish_time,
+                    url
+                FROM {source['table']}
+                WHERE title IS NOT NULL AND title <> ''
+                """
+            )
+
+        cursor.execute(
+            f"""
+            SELECT type, type_label, title, publish_time, url
+            FROM (
+                {' UNION ALL '.join(latest_sql_parts)}
+            ) AS latest_content
+            ORDER BY publish_time IS NULL, publish_time DESC
+            LIMIT 5
+            """
+        )
+        latest = []
+        for row in cursor.fetchall():
+            latest.append({
+                "type": row.get("type"),
+                "type_label": row.get("type_label"),
+                "title": row.get("title"),
+                "publish_time": format_date_value(row.get("publish_time")),
+                "url": row.get("url"),
+            })
+
+    finally:
+        cursor.close()
+        db.close()
+
+    return jsonify({
+        "summary": summary,
+        "updated_at": max((item["latest_date"] for item in summary if item["latest_date"]), default=None),
+        "trend": {
+            "dates": trend_dates,
+            "series": [
+                {
+                    "key": source["key"],
+                    "label": source["label"],
+                    "data": [trend_maps[source["key"]][day] for day in trend_dates],
+                }
+                for source in CONTENT_SOURCES
+            ],
+        },
+        "distribution": distribution,
+        "latest": latest,
+        "latest_by_type": latest_by_type,
+    })
 
 
 @app.route('/api/home/news')
