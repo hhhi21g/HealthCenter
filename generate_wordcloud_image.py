@@ -3,6 +3,10 @@ import jieba
 from collections import Counter
 import matplotlib.pyplot as plt
 from wordcloud import WordCloud
+import matplotlib
+matplotlib.use("Agg")   # 非交互式后端，不需要 Qt 窗口
+
+import matplotlib.pyplot as plt
 
 # 1. 数据库配置
 db_config = {
@@ -46,7 +50,7 @@ def generate_wordcloud(counter, output_path='wordcloud_policy.png'):
     # 可选：显示图片
     plt.imshow(wc, interpolation='bilinear')
     plt.axis("off")
-    plt.show()
+    plt.savefig("wordcloud.png", dpi=300, bbox_inches="tight")
 
 # 5. 主流程
 if __name__ == '__main__':

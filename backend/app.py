@@ -3,6 +3,7 @@ from flask import Flask, jsonify, render_template, send_from_directory, request,
 import pymysql
 import os
 import sys
+import json
 from datetime import date, timedelta
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
@@ -550,6 +551,19 @@ def knowledge():
 @app.route('/application')
 def application():
     return render_template('application.html', active_page='application')
+
+
+@app.route('/disease-map')
+def disease_map():
+    return render_template('disease-map.html', active_page='disease-map')
+
+
+@app.route('/api/disease-map')
+def api_disease_map():
+    data_path = os.path.join(app.static_folder, 'data', 'disease_map.json')
+    with open(data_path, 'r', encoding='utf-8') as file:
+        data = json.load(file)
+    return jsonify(data)
 
 
 @app.route('/about')

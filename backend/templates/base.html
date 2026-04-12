@@ -178,7 +178,7 @@
     document.addEventListener('click', function (e) {
         const userInfo = document.querySelector('.user-info');
         const logoutBtn = document.getElementById('logout-button');
-        if (!userInfo.contains(e.target)) {
+        if (userInfo && logoutBtn && !userInfo.contains(e.target)) {
             logoutBtn.style.display = 'none';
         }
     });

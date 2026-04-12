@@ -1,0 +1,869 @@
+{% extends "base.html" %}
+{% block content %}
+
+<style>
+    .disease-map-page {
+        background: #f4f7f8;
+        color: #1f2d2f;
+        min-height: calc(100vh - 90px);
+        padding: 28px 32px 42px;
+        font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .map-hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: end;
+        margin-bottom: 18px;
+    }
+
+    .map-hero h1 {
+        color: #176b75;
+        font-size: 2rem;
+        margin: 0 0 8px;
+    }
+
+    .map-hero p {
+        color: #526468;
+        line-height: 1.7;
+        margin: 0;
+        max-width: 860px;
+    }
+
+    .map-updated {
+        color: #5f6f73;
+        background: #fff;
+        border: 1px solid #dce8e8;
+        border-radius: 8px;
+        padding: 10px 14px;
+        white-space: nowrap;
+    }
+
+    .map-shell {
+        display: grid;
+        grid-template-columns: minmax(0, 1.75fr) minmax(340px, 0.85fr);
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    .map-stage,
+    .map-side,
+    .knowledge-section,
+    .source-section {
+        background: #fff;
+        border: 1px solid #dce8e8;
+        border-radius: 8px;
+        box-shadow: 0 8px 22px rgba(27, 77, 84, 0.08);
+    }
+
+    .map-stage {
+        padding: 18px;
+        min-height: 640px;
+    }
+
+    .map-toolbar {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 14px;
+        align-items: center;
+        margin-bottom: 12px;
+    }
+
+    .mode-buttons,
+    .map-selects {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .mode-button {
+        border: 1px solid #c9dbdc;
+        border-radius: 6px;
+        background: #fff;
+        color: #2d555a;
+        cursor: pointer;
+        font-size: 0.95rem;
+        padding: 8px 12px;
+        transition: all 0.2s ease;
+    }
+
+    .mode-button:hover,
+    .mode-button.active {
+        background: #176b75;
+        border-color: #176b75;
+        color: #fff;
+    }
+
+    .map-select,
+    .map-search {
+        border: 1px solid #c9dbdc;
+        border-radius: 6px;
+        color: #253d40;
+        font-size: 0.95rem;
+        padding: 8px 10px;
+        background: #fff;
+    }
+
+    .map-search {
+        min-width: 220px;
+    }
+
+    #china-disease-map {
+        width: 100%;
+        height: 560px;
+    }
+
+    .map-note {
+        color: #697b7f;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        margin-top: 10px;
+    }
+
+    .map-side {
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .panel-title {
+        color: #176b75;
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin: 0;
+    }
+
+    .panel-meta {
+        color: #67787b;
+        font-size: 0.92rem;
+        margin-top: 6px;
+    }
+
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .metric-item {
+        background: #eef6f4;
+        border: 1px solid #d5e7e3;
+        border-radius: 8px;
+        padding: 10px;
+    }
+
+    .metric-value {
+        color: #176b75;
+        font-size: 1.45rem;
+        font-weight: 700;
+        line-height: 1.2;
+    }
+
+    .metric-label {
+        color: #607276;
+        font-size: 0.82rem;
+        margin-top: 4px;
+    }
+
+    .tag-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .theme-tag {
+        background: #eef6f4;
+        border: 1px solid #cae0dc;
+        border-radius: 6px;
+        color: #176b75;
+        font-size: 0.88rem;
+        padding: 6px 9px;
+    }
+
+    .action-list {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .action-list li {
+        border-left: 4px solid #2f9e8f;
+        background: #f6faf9;
+        border-radius: 6px;
+        color: #30484c;
+        line-height: 1.6;
+        padding: 9px 10px;
+    }
+
+    .section-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+    }
+
+    .section-heading h2 {
+        color: #176b75;
+        font-size: 1.25rem;
+        margin: 0;
+    }
+
+    .section-heading span {
+        color: #6d7e81;
+        font-size: 0.92rem;
+    }
+
+    .knowledge-section,
+    .source-section {
+        margin-top: 18px;
+        padding: 18px;
+    }
+
+    .disease-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+    .disease-card {
+        border: 1px solid #dce8e8;
+        border-radius: 8px;
+        padding: 14px;
+        background: #fff;
+        min-height: 230px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .disease-card h3 {
+        color: #1e4f55;
+        font-size: 1.05rem;
+        margin: 0;
+    }
+
+    .disease-category {
+        color: #8a5a00;
+        background: #fff4d8;
+        border-radius: 6px;
+        display: inline-block;
+        font-size: 0.82rem;
+        padding: 4px 8px;
+        width: fit-content;
+    }
+
+    .disease-summary {
+        color: #4f6266;
+        line-height: 1.6;
+        margin: 0;
+        flex: 1;
+    }
+
+    .mini-actions {
+        color: #31494d;
+        display: grid;
+        gap: 6px;
+        font-size: 0.9rem;
+        line-height: 1.45;
+        margin: 0;
+        padding-left: 18px;
+    }
+
+    .link-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: auto;
+    }
+
+    .card-link,
+    .source-link {
+        color: #176b75;
+        border: 1px solid #b8d5d1;
+        border-radius: 6px;
+        display: inline-flex;
+        font-size: 0.88rem;
+        padding: 6px 9px;
+        text-decoration: none;
+    }
+
+    .card-link:hover,
+    .source-link:hover {
+        background: #eef6f4;
+    }
+
+    .source-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .empty-state,
+    .map-error {
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-radius: 8px;
+        color: #8a4b0f;
+        line-height: 1.7;
+        padding: 14px;
+    }
+
+    .map-error {
+        display: none;
+        margin-bottom: 12px;
+    }
+
+    @media (max-width: 1100px) {
+        .map-shell,
+        .map-hero {
+            grid-template-columns: 1fr;
+        }
+
+        .map-toolbar {
+            grid-template-columns: 1fr;
+        }
+
+        .disease-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 720px) {
+        .disease-map-page {
+            padding: 18px 14px 30px;
+        }
+
+        .map-stage {
+            min-height: 520px;
+        }
+
+        #china-disease-map {
+            height: 440px;
+        }
+
+        .metric-grid,
+        .disease-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .map-search {
+            min-width: 100%;
+        }
+    }
+</style>
+
+<main class="disease-map-page">
+    <div class="map-hero">
+        <div>
+            <h1>疾病预防地图</h1>
+            <p>按地区、季节和重点人群浏览常见疾病防控知识。地图展示的是健康知识入口和预防提示，不代表实时疫情或患病率。</p>
+        </div>
+        <div class="map-updated" id="map-updated">数据更新：--</div>
+    </div>
+
+    <div class="map-error" id="map-error"></div>
+
+    <section class="map-shell">
+        <div class="map-stage">
+            <div class="map-toolbar">
+                <div class="mode-buttons" aria-label="地图查看方式">
+                    <button type="button" class="mode-button active" data-mode="category">按疾病类型</button>
+                    <button type="button" class="mode-button" data-mode="season">按季节</button>
+                    <button type="button" class="mode-button" data-mode="population">按重点人群</button>
+                    <button type="button" class="mode-button" id="reset-province">全国概览</button>
+                </div>
+
+                <div class="map-selects">
+                    <select class="map-select" id="category-select" aria-label="选择疾病类型"></select>
+                    <select class="map-select" id="season-select" aria-label="选择季节" hidden></select>
+                    <select class="map-select" id="population-select" aria-label="选择重点人群" hidden></select>
+                    <input class="map-search" id="disease-search" type="search" placeholder="搜索疾病或预防主题">
+                </div>
+            </div>
+
+            <div id="china-disease-map" aria-label="中国疾病预防知识地图"></div>
+            <div class="map-note" id="map-note">点击省份查看推荐关注主题。当前高亮区域表示适合优先了解该类防控知识，不代表风险等级。</div>
+        </div>
+
+        <aside class="map-side" id="province-panel"></aside>
+    </section>
+
+    <section class="knowledge-section">
+        <div class="section-heading">
+            <h2>推荐预防知识</h2>
+            <span id="knowledge-count">--</span>
+        </div>
+        <div class="disease-grid" id="disease-grid"></div>
+    </section>
+
+    <section class="source-section">
+        <div class="section-heading">
+            <h2>权威来源入口</h2>
+            <span>建议以国家及当地卫生健康、疾控部门发布为准</span>
+        </div>
+        <div class="source-row" id="source-row"></div>
+    </section>
+</main>
+
+<script src="{{ url_for('static', filename='vendor/echarts.min.js') }}"></script>
+<script>
+    const state = {
+        mode: 'category',
+        category: '慢性病预防',
+        season: 'summer',
+        population: 'elderly',
+        province: '全国',
+        search: ''
+    };
+
+    let diseaseMapData = null;
+    let chinaGeoJson = null;
+    let diseaseChart = null;
+
+    const categoryColors = {
+        '呼吸道传染病': '#3d7ea6',
+        '消化道与食源性疾病': '#b7791f',
+        '蚊媒与虫媒疾病': '#2f9e8f',
+        '慢性病预防': '#d94841',
+        '季节性健康风险': '#e67700',
+        '重点人群健康': '#6f65b8'
+    };
+
+    const linkLabels = {
+        '/knowledge': '健康知识',
+        '/chest-diagnosis': '胸部检测',
+        '/water-intake': '饮水计算',
+        '/emergency-guide': '急救指导',
+        '/heart-diagnosis': '心脏预测',
+        '/diabetes-diagnosis': '糖尿病检测',
+        '/bmi': 'BMI 计算',
+        '/sleep-quality': '睡眠评估'
+    };
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function parseJsonResponse(response) {
+        return response.text().then(text => {
+            const data = text ? JSON.parse(text) : {};
+            if (!response.ok) {
+                throw new Error(data.error || `请求失败：${response.status}`);
+            }
+            return data;
+        });
+    }
+
+    function getProfiles() {
+        return diseaseMapData.province_profiles || {};
+    }
+
+    function getDiseaseByName(name) {
+        return diseaseMapData.diseases.find(disease => disease.name === name);
+    }
+
+    function textMatchesKeyword(text, keyword) {
+        const safeText = String(text || '');
+        const safeKeyword = String(keyword || '');
+        return safeText.includes(safeKeyword) || safeKeyword.includes(safeText);
+    }
+
+    function diseaseMatchesKeyword(disease, keyword) {
+        return [disease.name, disease.category, disease.summary].some(value => textMatchesKeyword(value, keyword));
+    }
+
+    function getActiveKeywords() {
+        if (state.mode === 'category') {
+            return [state.category];
+        }
+
+        if (state.mode === 'season') {
+            return diseaseMapData.seasons[state.season].themes;
+        }
+
+        return diseaseMapData.population_groups[state.population].themes;
+    }
+
+    function getActiveLabel() {
+        if (state.mode === 'category') {
+            return state.category;
+        }
+
+        if (state.mode === 'season') {
+            return diseaseMapData.seasons[state.season].label;
+        }
+
+        return diseaseMapData.population_groups[state.population].label;
+    }
+
+    function diseaseMatchesCurrentMode(disease) {
+        if (state.mode === 'category') {
+            return disease.category === state.category;
+        }
+
+        return getActiveKeywords().some(keyword => diseaseMatchesKeyword(disease, keyword));
+    }
+
+    function profileMatchesCurrentMode(profile) {
+        const recommendedDiseases = (profile.recommended || [])
+            .map(getDiseaseByName)
+            .filter(Boolean);
+        const profileTexts = [
+            ...(profile.themes || []),
+            ...(profile.recommended || []),
+            ...recommendedDiseases.map(disease => disease.category)
+        ];
+
+        return getActiveKeywords().some(keyword => profileTexts.some(text => textMatchesKeyword(text, keyword)));
+    }
+
+    function getProvinceCenter(name) {
+        const feature = chinaGeoJson.features.find(item => item.properties && item.properties.name === name);
+        return feature && feature.properties ? feature.properties.center : null;
+    }
+
+    function getModeColor() {
+        if (state.mode === 'category') {
+            return categoryColors[state.category] || '#176b75';
+        }
+
+        if (state.mode === 'season') {
+            return state.season === 'summer' ? '#e67700' : state.season === 'winter' ? '#3d7ea6' : '#2f9e8f';
+        }
+
+        return '#6f65b8';
+    }
+
+    function initControls() {
+        const categorySelect = document.getElementById('category-select');
+        const seasonSelect = document.getElementById('season-select');
+        const populationSelect = document.getElementById('population-select');
+
+        categorySelect.innerHTML = diseaseMapData.categories
+            .map(category => `<option value="${escapeHtml(category)}">${escapeHtml(category)}</option>`)
+            .join('');
+        categorySelect.value = state.category;
+
+        seasonSelect.innerHTML = Object.entries(diseaseMapData.seasons)
+            .map(([key, value]) => `<option value="${escapeHtml(key)}">${escapeHtml(value.label)}</option>`)
+            .join('');
+        seasonSelect.value = state.season;
+
+        populationSelect.innerHTML = Object.entries(diseaseMapData.population_groups)
+            .map(([key, value]) => `<option value="${escapeHtml(key)}">${escapeHtml(value.label)}</option>`)
+            .join('');
+        populationSelect.value = state.population;
+
+        document.querySelectorAll('[data-mode]').forEach(button => {
+            button.addEventListener('click', () => {
+                state.mode = button.dataset.mode;
+                document.querySelectorAll('[data-mode]').forEach(item => {
+                    item.classList.toggle('active', item.dataset.mode === state.mode);
+                });
+                updateControlVisibility();
+                renderAll();
+            });
+        });
+
+        categorySelect.addEventListener('change', event => {
+            state.category = event.target.value;
+            renderAll();
+        });
+
+        seasonSelect.addEventListener('change', event => {
+            state.season = event.target.value;
+            renderAll();
+        });
+
+        populationSelect.addEventListener('change', event => {
+            state.population = event.target.value;
+            renderAll();
+        });
+
+        document.getElementById('disease-search').addEventListener('input', event => {
+            state.search = event.target.value.trim();
+            renderDiseaseCards();
+        });
+
+        document.getElementById('reset-province').addEventListener('click', () => {
+            state.province = '全国';
+            renderAll();
+        });
+
+        updateControlVisibility();
+    }
+
+    function updateControlVisibility() {
+        document.getElementById('category-select').hidden = state.mode !== 'category';
+        document.getElementById('season-select').hidden = state.mode !== 'season';
+        document.getElementById('population-select').hidden = state.mode !== 'population';
+    }
+
+    function renderMap() {
+        const chartElement = document.getElementById('china-disease-map');
+        if (!diseaseChart) {
+            diseaseChart = echarts.init(chartElement);
+            diseaseChart.on('click', params => {
+                if (getProfiles()[params.name]) {
+                    state.province = params.name;
+                    renderAll();
+                }
+            });
+        }
+
+        const profiles = getProfiles();
+        const color = getModeColor();
+        const provinceData = Object.keys(profiles).map(name => {
+            const active = profileMatchesCurrentMode(profiles[name]);
+            return {
+                name,
+                value: active ? 2 : 1,
+                selected: state.province === name,
+                itemStyle: {
+                    areaColor: active ? color : '#d8e7e7',
+                    borderColor: '#ffffff'
+                }
+            };
+        });
+
+        const markerData = Object.keys(profiles)
+            .filter(name => profileMatchesCurrentMode(profiles[name]))
+            .map(name => {
+                const center = getProvinceCenter(name);
+                return center ? {name, coord: center, value: getActiveLabel()} : null;
+            })
+            .filter(Boolean);
+
+        diseaseChart.setOption({
+            tooltip: {
+                trigger: 'item',
+                formatter: params => {
+                    const profile = profiles[params.name];
+                    if (!profile) {
+                        return params.name || '';
+                    }
+                    const themes = (profile.themes || []).slice(0, 4).join('、');
+                    return `${params.name}<br/>推荐关注：${themes}`;
+                }
+            },
+            series: [{
+                name: '疾病预防知识',
+                type: 'map',
+                map: 'china',
+                roam: true,
+                zoom: 1.12,
+                layoutCenter: ['50%', '52%'],
+                layoutSize: '95%',
+                selectedMode: 'single',
+                data: provinceData,
+                itemStyle: {
+                    areaColor: '#d8e7e7',
+                    borderColor: '#ffffff',
+                    borderWidth: 1
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        color: '#1f2d2f',
+                        fontWeight: 700
+                    },
+                    itemStyle: {
+                        areaColor: '#f6c453'
+                    }
+                },
+                select: {
+                    label: {
+                        show: true,
+                        color: '#fff',
+                        fontWeight: 700
+                    },
+                    itemStyle: {
+                        areaColor: '#1f7a8c',
+                        borderColor: '#124952',
+                        borderWidth: 1.5
+                    }
+                },
+                markPoint: {
+                    symbol: 'circle',
+                    symbolSize: 10,
+                    data: markerData,
+                    itemStyle: {
+                        color,
+                        borderColor: '#ffffff',
+                        borderWidth: 2
+                    },
+                    emphasis: {
+                        scale: 1.6
+                    },
+                    label: {
+                        show: false
+                    }
+                }
+            }]
+        }, true);
+
+        document.getElementById('map-note').textContent =
+            `当前查看：${getActiveLabel()}。高亮省份表示可优先了解相关防控知识，点击省份查看具体行动建议。`;
+    }
+
+    function renderProvincePanel() {
+        const panel = document.getElementById('province-panel');
+        const profiles = getProfiles();
+        const profile = profiles[state.province];
+
+        if (!profile) {
+            panel.innerHTML = `
+                <div>
+                    <h2 class="panel-title">全国疾病预防知识地图</h2>
+                    <div class="panel-meta">当前查看：${escapeHtml(getActiveLabel())}</div>
+                </div>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-value">${Object.keys(profiles).length}</div>
+                        <div class="metric-label">省级区域</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${diseaseMapData.categories.length}</div>
+                        <div class="metric-label">疾病类型</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-value">${diseaseMapData.diseases.length}</div>
+                        <div class="metric-label">知识卡片</div>
+                    </div>
+                </div>
+                <div>
+                    <div class="section-heading"><h2>当前主题</h2></div>
+                    <div class="tag-list">${getActiveKeywords().map(keyword => `<span class="theme-tag">${escapeHtml(keyword)}</span>`).join('')}</div>
+                </div>
+                <div class="empty-state">${escapeHtml(diseaseMapData.notice)}</div>
+            `;
+            return;
+        }
+
+        panel.innerHTML = `
+            <div>
+                <h2 class="panel-title">${escapeHtml(state.province)}健康预防提示</h2>
+                <div class="panel-meta">区域：${escapeHtml(profile.region)} · 当前查看：${escapeHtml(getActiveLabel())}</div>
+            </div>
+            <div>
+                <div class="section-heading"><h2>推荐关注</h2></div>
+                <div class="tag-list">${(profile.themes || []).map(theme => `<span class="theme-tag">${escapeHtml(theme)}</span>`).join('')}</div>
+            </div>
+            <div>
+                <div class="section-heading"><h2>重点预防行动</h2></div>
+                <ul class="action-list">${(profile.actions || []).map(action => `<li>${escapeHtml(action)}</li>`).join('')}</ul>
+            </div>
+            <div>
+                <div class="section-heading"><h2>推荐阅读</h2></div>
+                <div class="tag-list">${(profile.recommended || []).map(name => `<span class="theme-tag">${escapeHtml(name)}</span>`).join('')}</div>
+            </div>
+        `;
+    }
+
+    function getVisibleDiseases() {
+        let diseases = diseaseMapData.diseases.filter(diseaseMatchesCurrentMode);
+        const profile = getProfiles()[state.province];
+
+        if (profile && profile.recommended && profile.recommended.length) {
+            const recommended = profile.recommended.map(getDiseaseByName).filter(Boolean);
+            const merged = [...recommended, ...diseases];
+            const names = new Set();
+            diseases = merged.filter(disease => {
+                if (names.has(disease.name)) {
+                    return false;
+                }
+                names.add(disease.name);
+                return true;
+            });
+        }
+
+        if (state.search) {
+            diseases = diseases.filter(disease => {
+                const text = [disease.name, disease.category, disease.summary, ...(disease.actions || [])].join(' ');
+                return text.includes(state.search);
+            });
+        }
+
+        return diseases;
+    }
+
+    function renderDiseaseCards() {
+        const grid = document.getElementById('disease-grid');
+        const diseases = getVisibleDiseases();
+        document.getElementById('knowledge-count').textContent = `${diseases.length} 条`;
+
+        if (!diseases.length) {
+            grid.innerHTML = '<div class="empty-state">没有匹配的疾病知识卡片，请调整筛选条件或搜索关键词。</div>';
+            return;
+        }
+
+        grid.innerHTML = diseases.map(disease => `
+            <article class="disease-card">
+                <div>
+                    <h3>${escapeHtml(disease.name)}</h3>
+                    <span class="disease-category">${escapeHtml(disease.category)}</span>
+                </div>
+                <p class="disease-summary">${escapeHtml(disease.summary)}</p>
+                <ul class="mini-actions">
+                    ${(disease.actions || []).slice(0, 3).map(action => `<li>${escapeHtml(action)}</li>`).join('')}
+                </ul>
+                <div class="link-row">
+                    ${(disease.links || []).map(link => `<a class="card-link" href="${escapeHtml(link)}">${escapeHtml(linkLabels[link] || '查看详情')}</a>`).join('')}
+                </div>
+            </article>
+        `).join('');
+    }
+
+    function renderSources() {
+        document.getElementById('source-row').innerHTML = diseaseMapData.sources
+            .map(source => `<a class="source-link" href="${escapeHtml(source.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(source.name)}</a>`)
+            .join('');
+    }
+
+    function renderAll() {
+        renderMap();
+        renderProvincePanel();
+        renderDiseaseCards();
+    }
+
+    function initDiseaseMap() {
+        Promise.all([
+            fetch('{{ url_for("static", filename="data/china.json") }}').then(parseJsonResponse),
+            fetch('/api/disease-map').then(parseJsonResponse)
+        ])
+            .then(([geoJson, data]) => {
+                chinaGeoJson = geoJson;
+                diseaseMapData = data;
+                echarts.registerMap('china', chinaGeoJson);
+                document.getElementById('map-updated').textContent = `数据更新：${data.updated_at || '--'}`;
+                initControls();
+                renderSources();
+                renderAll();
+                window.addEventListener('resize', () => {
+                    if (diseaseChart) {
+                        diseaseChart.resize();
+                    }
+                });
+            })
+            .catch(error => {
+                const errorBox = document.getElementById('map-error');
+                errorBox.textContent = `疾病预防地图加载失败：${error.message}`;
+                errorBox.style.display = 'block';
+            });
+    }
+
+    initDiseaseMap();
+</script>
+
+{% endblock %}
