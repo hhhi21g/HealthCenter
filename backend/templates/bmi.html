@@ -19,16 +19,18 @@
             background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
             color: #333;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
 
         .content {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 70px);
+            min-height: calc(100vh - 70px);
             padding: 20px;
+            gap: 22px;
         }
 
         .calculator-container {
@@ -148,6 +150,154 @@
             display: inline-block;
         }
 
+        .bmi-scale-panel {
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .bmi-scale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: #39546d;
+            font-size: 0.95rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .bmi-scale-value {
+            color: #1e5799;
+            white-space: nowrap;
+        }
+
+        .bmi-scale-wrap {
+            position: relative;
+            padding-top: 24px;
+        }
+
+        .bmi-scale-track {
+            display: flex;
+            height: 18px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e9edf3;
+            box-shadow: inset 0 0 0 1px rgba(44, 62, 80, 0.08);
+        }
+
+        .bmi-segment {
+            position: relative;
+            height: 100%;
+        }
+
+        .bmi-segment.underweight {
+            width: 21.43%;
+            background: #74c0fc;
+        }
+
+        .bmi-segment.normal {
+            width: 30.48%;
+            background: #69db7c;
+        }
+
+        .bmi-segment.overweight {
+            width: 23.81%;
+            background: #ffd43b;
+        }
+
+        .bmi-segment.obese {
+            width: 24.28%;
+            background: #ff8787;
+        }
+
+        .bmi-pointer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            transition: left 0.35s ease;
+            z-index: 2;
+        }
+
+        .bmi-pointer-value {
+            background: #1e5799;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: 5px 7px;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(30, 87, 153, 0.2);
+        }
+
+        .bmi-pointer-arrow {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #1e5799;
+        }
+
+        .bmi-scale-ticks {
+            position: relative;
+            height: 20px;
+            margin-top: 8px;
+            color: #6b7c8f;
+            font-size: 0.78rem;
+        }
+
+        .bmi-scale-ticks span {
+            position: absolute;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .bmi-scale-ticks span:nth-child(1) {
+            left: 0;
+            transform: translateX(0);
+        }
+
+        .bmi-scale-ticks span:nth-child(2) {
+            left: 21.43%;
+        }
+
+        .bmi-scale-ticks span:nth-child(3) {
+            left: 51.91%;
+        }
+
+        .bmi-scale-ticks span:nth-child(4) {
+            left: 75.72%;
+        }
+
+        .bmi-scale-ticks span:nth-child(5) {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+
+        .bmi-scale-labels {
+            display: grid;
+            grid-template-columns: 21.43% 30.48% 23.81% 24.28%;
+            gap: 0;
+            color: #425466;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        .bmi-scale-note {
+            color: #66788a;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            margin-top: 10px;
+            text-align: center;
+        }
+
         .info-section h2 {
             font-size: 1.8rem;
             margin-bottom: 25px;
@@ -200,6 +350,46 @@
             border-radius: 8px;
         }
 
+        .bmi-history-section {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(30, 87, 153, 0.16);
+            padding: 24px 28px;
+        }
+
+        .bmi-history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .bmi-history-header h2 {
+            color: #1e5799;
+            font-size: 1.35rem;
+            margin: 0 0 6px;
+        }
+
+        .bmi-history-header p {
+            color: #657487;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        .bmi-history-status {
+            color: #60758a;
+            font-size: 0.92rem;
+            white-space: nowrap;
+        }
+
+        #bmi-history-chart {
+            width: 100%;
+            height: 280px;
+        }
+
         @media (max-width: 900px) {
             .calculator-container {
                 flex-direction: column;
@@ -213,6 +403,15 @@
             .content {
                 height: auto;
                 padding: 30px 20px;
+            }
+
+            .bmi-history-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .bmi-history-status {
+                white-space: normal;
             }
         }
 
@@ -325,6 +524,39 @@
                 <p>您的BMI指数：</p>
                 <div class="bmi-value" id="bmi-value">--</div>
                 <div class="bmi-status" id="bmi-status">等待计算</div>
+
+                <div class="bmi-scale-panel" aria-label="BMI区间刻度条">
+                    <div class="bmi-scale-header">
+                        <span>BMI 区间定位</span>
+                        <span class="bmi-scale-value" id="bmi-scale-value">等待计算</span>
+                    </div>
+                    <div class="bmi-scale-wrap">
+                        <div class="bmi-pointer" id="bmi-pointer">
+                            <div class="bmi-pointer-value" id="bmi-pointer-value">--</div>
+                            <div class="bmi-pointer-arrow"></div>
+                        </div>
+                        <div class="bmi-scale-track">
+                            <div class="bmi-segment underweight"></div>
+                            <div class="bmi-segment normal"></div>
+                            <div class="bmi-segment overweight"></div>
+                            <div class="bmi-segment obese"></div>
+                        </div>
+                        <div class="bmi-scale-ticks">
+                            <span>14</span>
+                            <span>18.5</span>
+                            <span>24.9</span>
+                            <span>29.9</span>
+                            <span>35+</span>
+                        </div>
+                        <div class="bmi-scale-labels">
+                            <span>偏瘦</span>
+                            <span>正常</span>
+                            <span>超重</span>
+                            <span>肥胖</span>
+                        </div>
+                    </div>
+                    <div class="bmi-scale-note">指针按 14-35+ 的展示范围定位，超过边界时固定在刻度条两端。</div>
+                </div>
             </div>
         </div>
 
@@ -369,16 +601,34 @@
             </div>
         </div>
     </div>
+
+    <section class="bmi-history-section" aria-label="BMI变化趋势">
+        <div class="bmi-history-header">
+            <div>
+                <h2>最近10次 BMI 变化</h2>
+                <p>登录后每次计算会自动保存记录，虚线表示 BMI 正常参考范围。</p>
+            </div>
+            <div class="bmi-history-status" id="bmi-history-status">正在加载历史记录...</div>
+        </div>
+        <div id="bmi-history-chart"></div>
+    </section>
 </div>
 
 
+<script src="{{ url_for('static', filename='vendor/echarts.min.js') }}"></script>
 <script>
+    const isLoggedIn = {{ 'true' if session.get('username') else 'false' }};
+    let bmiHistoryChart = null;
+
     function calculateBMI() {
         const heightInput = document.getElementById('height');
         const weightInput = document.getElementById('weight');
         const resultContainer = document.getElementById('result');
         const bmiValue = document.getElementById('bmi-value');
         const bmiStatus = document.getElementById('bmi-status');
+        const bmiScaleValue = document.getElementById('bmi-scale-value');
+        const bmiPointer = document.getElementById('bmi-pointer');
+        const bmiPointerValue = document.getElementById('bmi-pointer-value');
 
         const height = parseFloat(heightInput.value);
         const weight = parseFloat(weightInput.value);
@@ -388,6 +638,8 @@
             bmiValue.textContent = '--';
             bmiStatus.textContent = '请输入有效的数值';
             bmiStatus.style.background = '#ff6b6b';
+            bmiScaleValue.textContent = '等待有效输入';
+            bmiPointer.style.display = 'none';
             return;
         }
 
@@ -398,6 +650,7 @@
 
         // 显示结果
         bmiValue.textContent = roundedBmi;
+        updateBmiScale(bmi, roundedBmi);
 
         // 确定BMI状态
         let status = '';
@@ -419,12 +672,176 @@
 
         bmiStatus.textContent = status;
         bmiStatus.style.background = statusColor;
+        saveBmiRecord(height, weight);
 
         // 添加动画效果
         resultContainer.style.animation = 'none';
         setTimeout(() => {
             resultContainer.style.animation = 'pulse 0.5s';
         }, 10);
+    }
+
+    function updateBmiScale(bmi, roundedBmi) {
+        const bmiScaleValue = document.getElementById('bmi-scale-value');
+        const bmiPointer = document.getElementById('bmi-pointer');
+        const bmiPointerValue = document.getElementById('bmi-pointer-value');
+        const minBmi = 14;
+        const maxBmi = 35;
+        const clampedBmi = Math.min(Math.max(bmi, minBmi), maxBmi);
+        const position = ((clampedBmi - minBmi) / (maxBmi - minBmi)) * 100;
+
+        bmiScaleValue.textContent = `当前 BMI：${roundedBmi}`;
+        bmiPointerValue.textContent = roundedBmi;
+        bmiPointer.style.left = `${position}%`;
+        bmiPointer.style.display = 'flex';
+    }
+
+    function parseJsonResponse(response) {
+        return response.text().then(text => {
+            const data = text ? JSON.parse(text) : {};
+            if (!response.ok) {
+                throw new Error(data.error || data.message || `请求失败：${response.status}`);
+            }
+            return data;
+        });
+    }
+
+    function renderBmiHistory(records, message) {
+        const status = document.getElementById('bmi-history-status');
+        const chartElement = document.getElementById('bmi-history-chart');
+        const safeRecords = records || [];
+
+        if (!window.echarts) {
+            status.textContent = '趋势图组件加载失败';
+            return;
+        }
+
+        if (!bmiHistoryChart) {
+            bmiHistoryChart = echarts.init(chartElement);
+            window.addEventListener('resize', () => bmiHistoryChart && bmiHistoryChart.resize());
+        }
+
+        if (!isLoggedIn) {
+            status.textContent = message || '登录后可查看BMI历史趋势';
+        } else if (!safeRecords.length) {
+            status.textContent = '暂无记录，计算一次后生成趋势';
+        } else {
+            status.textContent = `已记录 ${safeRecords.length} 次`;
+        }
+
+        bmiHistoryChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const item = params.find(row => row.seriesName === 'BMI');
+                    if (!item) {
+                        return '';
+                    }
+                    const record = safeRecords[item.dataIndex];
+                    return [
+                        record.label,
+                        `BMI：${record.bmi.toFixed(1)}`,
+                        `分类：${record.category}`,
+                        `身高：${record.height_cm.toFixed(1)} cm`,
+                        `体重：${record.weight_kg.toFixed(1)} kg`
+                    ].join('<br/>');
+                }
+            },
+            grid: {
+                left: 48,
+                right: 24,
+                top: 28,
+                bottom: 44
+            },
+            xAxis: {
+                type: 'category',
+                data: safeRecords.map(record => record.label),
+                axisLabel: {
+                    color: '#5f7185'
+                },
+                axisLine: {
+                    lineStyle: { color: '#c9d6e4' }
+                }
+            },
+            yAxis: {
+                type: 'value',
+                min: 14,
+                max: 35,
+                splitLine: {
+                    lineStyle: { color: '#e6edf5' }
+                },
+                axisLabel: {
+                    color: '#5f7185'
+                }
+            },
+            series: [{
+                name: 'BMI',
+                type: 'line',
+                data: safeRecords.map(record => Number(record.bmi.toFixed(1))),
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 8,
+                lineStyle: {
+                    color: '#1e5799',
+                    width: 3
+                },
+                itemStyle: {
+                    color: '#2989d8'
+                },
+                areaStyle: {
+                    color: 'rgba(41, 137, 216, 0.12)'
+                },
+                markLine: {
+                    symbol: 'none',
+                    silent: true,
+                    label: {
+                        color: '#2f9e44',
+                        formatter: params => params.name
+                    },
+                    lineStyle: {
+                        color: '#2f9e44',
+                        type: 'dashed',
+                        width: 1.5
+                    },
+                    data: [
+                        { name: '正常下限 18.5', yAxis: 18.5 },
+                        { name: '正常上限 24.9', yAxis: 24.9 }
+                    ]
+                }
+            }]
+        });
+    }
+
+    function loadBmiHistory() {
+        fetch('/api/bmi-records')
+            .then(parseJsonResponse)
+            .then(data => renderBmiHistory(data.records, data.message))
+            .catch(error => {
+                document.getElementById('bmi-history-status').textContent = `历史记录加载失败：${error.message}`;
+            });
+    }
+
+    function saveBmiRecord(height, weight) {
+        if (!isLoggedIn) {
+            renderBmiHistory([], '登录后可保存并查看最近10次BMI变化趋势');
+            return;
+        }
+
+        fetch('/api/bmi-records', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                height_cm: height,
+                weight_kg: weight
+            })
+        })
+            .then(parseJsonResponse)
+            .then(data => renderBmiHistory(data.records, data.message))
+            .catch(error => {
+                document.getElementById('bmi-history-status').textContent = `BMI记录保存失败：${error.message}`;
+            });
     }
 
     // 添加输入框回车支持
@@ -443,6 +860,7 @@
     // 初始示例值
     document.getElementById('height').value = '175';
     document.getElementById('weight').value = '70';
+    loadBmiHistory();
 </script>
 <!-- ✅ 医学声明页脚 -->
 <footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">

@@ -15,7 +15,47 @@
 
         h1 {
             color: #007acc;
-            margin: 1em 2em 0 2em;
+            margin: 0;
+        }
+
+        .page-header {
+            align-items: center;
+            display: flex;
+            gap: 1em;
+            justify-content: space-between;
+            margin: 1em 4em 0 2em;
+        }
+
+        .search-bar {
+            display: flex;
+            gap: 0.6em;
+            flex: 0 1 430px;
+            margin: 0;
+        }
+
+        .search-bar input {
+            flex: 1;
+            border: 1px solid #d6e4ef;
+            border-radius: 6px;
+            font-size: 1rem;
+            min-width: 0;
+            padding: 0.7em 0.9em;
+        }
+
+        .search-bar button {
+            border: none;
+            background: #007acc;
+            color: #fff;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 0.7em 1.1em;
+        }
+
+        .search-status {
+            color: #666;
+            display: none;
+            margin: 0.7em 2em 0 5em;
         }
 
         .news-item {
@@ -73,6 +113,27 @@
             padding-top: 0.5em;
             font-size: 1rem;
             color: #555;
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 6px;
+            color: #777;
+            margin: 1em 2em;
+            padding: 1em;
+            text-align: center;
+        }
+
+        @media (max-width: 768px) {
+            .page-header {
+                align-items: stretch;
+                flex-direction: column;
+                margin: 1em 2em 0;
+            }
+
+            .search-bar {
+                flex-basis: auto;
+            }
         }
     </style>
 </head>
@@ -134,14 +195,23 @@
     </div>
 </div>
 
-<h1>新闻中心</h1>
+<div class="page-header">
+    <h1>新闻中心</h1>
+    <form class="search-bar" id="search-form">
+        <input id="search-input" type="search" placeholder="输入关键词搜索新闻标题" autocomplete="off">
+        <button type="submit">搜索</button>
+    </form>
+</div>
+<div class="search-status" id="search-status"></div>
 <div id="news-list">正在加载...</div>
 <div id="pagination"></div>
 
 <script>
     const pageSize = 10;
+    const apiPath = '/api/news';
     let currentPage = 1;
     let totalPages = 1;
+    let currentKeyword = '';
 
     function parseJsonResponse(response) {
         return response.text().then(text => {
@@ -158,29 +228,79 @@
         });
     }
 
+    function buildPageUrl(page) {
+        const params = new URLSearchParams({
+            page: page,
+            size: pageSize
+        });
+        if (currentKeyword) {
+            params.set('q', currentKeyword);
+        }
+        return `${apiPath}?${params.toString()}`;
+    }
+
+    function renderSearchStatus(total) {
+        const status = document.getElementById('search-status');
+        if (!currentKeyword) {
+            status.style.display = 'none';
+            status.textContent = '';
+            return;
+        }
+
+        status.style.display = 'block';
+        status.textContent = `关键词“${currentKeyword}”共找到 ${total} 条结果`;
+    }
+
+    function renderItems(data) {
+        const list = document.getElementById('news-list');
+        list.innerHTML = '';
+
+        if (data.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            empty.textContent = '未找到匹配内容';
+            list.appendChild(empty);
+            return;
+        }
+
+        data.forEach(news => {
+            const div = document.createElement('div');
+            div.className = 'news-item';
+
+            const title = document.createElement('div');
+            title.className = 'news-title';
+            const link = document.createElement('a');
+            link.href = news.url || '#';
+            link.target = '_blank';
+            link.textContent = news.title || '无标题';
+            title.appendChild(link);
+
+            const summary = document.createElement('div');
+            summary.className = 'news-summary';
+            summary.textContent = news.summary || '（暂无正文内容）';
+
+            const time = document.createElement('div');
+            time.className = 'news-time';
+            time.textContent = news.publish_time ? news.publish_time.slice(0, 10) : '';
+
+            div.appendChild(title);
+            div.appendChild(summary);
+            div.appendChild(time);
+            list.appendChild(div);
+        });
+    }
+
     function loadPage(page) {
-        fetch(`/api/news?page=${page}&size=${pageSize}`)
+        fetch(buildPageUrl(page))
             .then(parseJsonResponse)
             .then(result => {
                 const data = result.data;
                 const total = result.total;
-                totalPages = Math.ceil(total / pageSize);
+                totalPages = Math.max(1, Math.ceil(total / pageSize));
                 currentPage = page;
 
-                const list = document.getElementById('news-list');
-                list.innerHTML = '';
-
-                data.forEach(news => {
-                    const div = document.createElement('div');
-                    div.className = 'news-item';
-                    div.innerHTML = `
-                        <div class="news-title"><a href="${news.url}" target="_blank">${news.title}</a></div>
-                        <div class="news-summary">${news.summary}</div>
-                        <div class="news-time">${news.publish_time ? news.publish_time.slice(0, 10) : ''}</div>
-                    `;
-                    list.appendChild(div);
-                });
-
+                renderSearchStatus(total);
+                renderItems(data);
                 renderPagination();
             })
             .catch(err => {
@@ -213,6 +333,12 @@
 
         pagination.appendChild(createBtn('下一页 »', currentPage + 1, currentPage === totalPages));
     }
+
+    document.getElementById('search-form').addEventListener('submit', event => {
+        event.preventDefault();
+        currentKeyword = document.getElementById('search-input').value.trim();
+        loadPage(1);
+    });
 
     // 初始化加载第一页
     loadPage(1);

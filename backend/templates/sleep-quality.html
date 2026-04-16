@@ -25,47 +25,70 @@
             justify-content: center;
             align-items: center;
             min-height: calc(100vh - 70px);
-            padding: 20px;
+            padding: 12px 18px;
         }
 
         .content {
             display: flex;
             justify-content: center;
             align-items: stretch;
-            max-width: 1200px;
+            max-width: 1460px;
             width: 100%;
-            gap: 30px;
+            gap: 34px;
         }
 
         .calculator-container {
-            width: 600px;
+            width: 860px;
             background: white;
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(30, 87, 153, 0.2);
-            padding: 30px;
+            padding: 34px 36px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .info-sidebar {
-            width: 400px;
+            width: 560px;
             background: white;
             border-radius: 15px;
             box-shadow: 0 15px 30px rgba(30, 87, 153, 0.2);
-            padding: 30px;
-            align-self: center;
+            padding: 34px 36px;
+            align-self: stretch;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sleep-history-status {
+            color: #607486;
+            font-size: 1.04rem;
+            line-height: 1.5;
+            margin-bottom: 16px;
+        }
+
+        #sleep-history-chart {
+            width: 100%;
+            height: 420px;
+            flex: 1;
+            min-height: 380px;
+        }
+
+        .sleep-history-note {
+            color: #607486;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-top: 16px;
         }
 
         h1, h2 {
             position: relative;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 14px;
+            margin-bottom: 24px;
         }
 
         h1 {
             color: #1e5799;
-            font-size: 2rem;
+            font-size: 2.25rem;
         }
 
         h1::after {
@@ -80,7 +103,7 @@
         }
 
         h2 {
-            font-size: 1.5rem;
+            font-size: 2rem;
             color: #1e5799;
         }
 
@@ -96,7 +119,7 @@
         }
 
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 20px;
             width: 48%;
             display: inline-block;
             vertical-align: top;
@@ -107,15 +130,15 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #2c3e50;
-            font-size: 1rem;
+            font-size: 1.14rem;
         }
 
         input, select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 16px;
             border: 2px solid #e1e5eb;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.14rem;
             transition: all 0.3s ease;
             background: #f8fafc;
         }
@@ -128,12 +151,12 @@
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: linear-gradient(to right, #1e5799, #2989d8);
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1.18rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -148,48 +171,181 @@
         }
 
         .result-container {
-            margin-top: 25px;
-            padding: 20px;
+            margin-top: 28px;
+            padding: 26px;
             background: #f8faff;
             border-radius: 10px;
             text-align: center;
             border: 1px solid #e1e8f0;
-            min-height: 150px;
+            min-height: 260px;
             display: flex;
             flex-direction: column;
             justify-content: center;
         }
 
         .score-value {
-            font-size: 2.8rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin: 10px 0;
+            margin: 8px 0;
             color: #1e5799;
             line-height: 1.1;
         }
 
         .score-status {
-            font-size: 1.2rem;
+            font-size: 1.26rem;
             font-weight: 600;
-            margin-top: 10px;
-            padding: 8px 20px;
+            margin-top: 12px;
+            padding: 10px 24px;
             border-radius: 30px;
             display: inline-block;
         }
 
+        .sleep-scale-panel {
+            margin-top: 28px;
+            text-align: left;
+        }
+
+        .sleep-scale-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: #39546d;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+        }
+
+        .sleep-scale-value {
+            color: #1e5799;
+            white-space: nowrap;
+        }
+
+        .sleep-scale-wrap {
+            position: relative;
+            padding-top: 28px;
+        }
+
+        .sleep-scale-track {
+            display: flex;
+            height: 24px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #e9edf3;
+            box-shadow: inset 0 0 0 1px rgba(30, 87, 153, 0.08);
+        }
+
+        .sleep-segment.poor {
+            width: 55.56%;
+            background: #ff8787;
+        }
+
+        .sleep-segment.fair {
+            width: 22.22%;
+            background: #ffd43b;
+        }
+
+        .sleep-segment.good {
+            width: 22.22%;
+            background: #51cf66;
+        }
+
+        .sleep-pointer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform: translateX(-50%);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            z-index: 2;
+        }
+
+        .sleep-pointer-value {
+            background: #1e5799;
+            color: #fff;
+            border-radius: 6px;
+            font-size: 0.94rem;
+            font-weight: 700;
+            line-height: 1;
+            padding: 6px 10px;
+            white-space: nowrap;
+            box-shadow: 0 4px 10px rgba(30, 87, 153, 0.2);
+        }
+
+        .sleep-pointer-arrow {
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #1e5799;
+        }
+
+        .sleep-scale-ticks {
+            position: relative;
+            height: 20px;
+            margin-top: 10px;
+            color: #6b7c8f;
+            font-size: 0.9rem;
+        }
+
+        .sleep-scale-ticks span {
+            position: absolute;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .sleep-scale-ticks span:nth-child(1) {
+            left: 0;
+            transform: translateX(0);
+        }
+
+        .sleep-scale-ticks span:nth-child(2) {
+            left: 55.56%;
+        }
+
+        .sleep-scale-ticks span:nth-child(3) {
+            left: 77.78%;
+        }
+
+        .sleep-scale-ticks span:nth-child(4) {
+            left: 100%;
+            transform: translateX(-100%);
+        }
+
+        .sleep-scale-labels {
+            display: grid;
+            grid-template-columns: 55.56% 22.22% 22.22%;
+            color: #425466;
+            font-size: 0.96rem;
+            font-weight: 700;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        .sleep-scale-note {
+            color: #66788a;
+            font-size: 0.96rem;
+            line-height: 1.5;
+            margin-top: 12px;
+            text-align: center;
+        }
+
         .waiting-text {
-            font-size: 1.2rem;
+            font-size: 3.5rem;
             color: #666;
         }
 
         .formula {
             background: rgba(30, 87, 153, 0.1);
-            padding: 15px;
+            padding: 18px;
             border-radius: 10px;
-            font-size: 1rem;
+            font-size: 1.18rem;
             font-weight: 600;
             text-align: center;
-            margin: 20px 0;
+            margin: 8px 0 20px;
+            line-height: 1.55;
         }
 
         table {
@@ -222,8 +378,8 @@
 
         .status-indicator {
             display: inline-block;
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             margin-right: 8px;
         }
@@ -244,7 +400,7 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
 
         @keyframes fadeIn {
@@ -270,7 +426,7 @@
             }
         }
 
-        @media (max-width: 1200px) {
+        @media (max-width: 1280px) {
             .content {
                 flex-direction: column;
                 align-items: center;
@@ -283,6 +439,16 @@
 
             .info-sidebar {
                 margin-top: 30px;
+            }
+        }
+
+        @media (min-width: 1281px) and (max-width: 1450px) {
+            .calculator-container {
+                width: 760px;
+            }
+
+            .info-sidebar {
+                width: 500px;
             }
         }
 
@@ -415,76 +581,57 @@
                 <div class="waiting-text" id="waiting-text">--</div>
                 <div class="score-value" id="score-value" style="display: none;"></div>
                 <div class="score-status" id="score-status" style="display: none;"></div>
+
+                <div class="sleep-scale-panel" aria-label="睡眠评分区间条">
+                    <div class="sleep-scale-header">
+                        <span>睡眠评分区间定位</span>
+                        <span class="sleep-scale-value" id="sleep-scale-value">等待计算</span>
+                    </div>
+                    <div class="sleep-scale-wrap">
+                        <div class="sleep-pointer" id="sleep-pointer">
+                            <div class="sleep-pointer-value" id="sleep-pointer-value">--</div>
+                            <div class="sleep-pointer-arrow"></div>
+                        </div>
+                        <div class="sleep-scale-track">
+                            <div class="sleep-segment poor"></div>
+                            <div class="sleep-segment fair"></div>
+                            <div class="sleep-segment good"></div>
+                        </div>
+                        <div class="sleep-scale-ticks">
+                            <span>0</span>
+                            <span>10</span>
+                            <span>14</span>
+                            <span>18</span>
+                        </div>
+                        <div class="sleep-scale-labels">
+                            <span>较差</span>
+                            <span>一般</span>
+                            <span>优秀</span>
+                        </div>
+                    </div>
+                    <div class="sleep-scale-note">指针按 0-18 分展示范围定位，分数越高代表睡眠质量越好。</div>
+                </div>
             </div>
         </div>
 
         <div class="info-sidebar">
-            <h2>睡眠质量评估说明</h2>
-
+            <h2>睡眠质量变化趋势</h2>
             <div class="formula">
                 睡眠时长(0-3分) + 入睡时间(0-3分) + 醒来次数(0-3分) +
                 早晨感觉(1-3分) + 白天状态(1-3分) + 满意度(1-3分)
             </div>
-
-            <h3>评分标准</h3>
-            <table>
-                <tr>
-                    <th>评估项目</th>
-                    <th>评分标准</th>
-                </tr>
-                <tr>
-                    <td>睡眠时长</td>
-                    <td>
-                        ≥7小时: 3分<br>
-                        6-7小时: 2分<br>
-                        5-6小时: 1分<br>
-                        &lt;5小时: 0分
-                    </td>
-                </tr>
-                <tr>
-                    <td>入睡时间</td>
-                    <td>
-                        ≤15分钟: 3分<br>
-                        16-30分钟: 2分<br>
-                        31-45分钟: 1分<br>
-                        &gt;45分钟: 0分
-                    </td>
-                </tr>
-                <tr>
-                    <td>夜间醒来</td>
-                    <td>
-                        0次: 3分<br>
-                        1次: 2分<br>
-                        2次: 1分<br>
-                        ≥3次: 0分
-                    </td>
-                </tr>
-            </table>
-
-            <h3 style="margin-top: 20px;">评估结果</h3>
-            <table>
-                <tr>
-                    <th>总分范围</th>
-                    <th>睡眠质量</th>
-                </tr>
-                <tr>
-                    <td>14-18分</td>
-                    <td><span class="status-indicator good"></span> 优秀</td>
-                </tr>
-                <tr>
-                    <td>10-13分</td>
-                    <td><span class="status-indicator fair"></span> 一般</td>
-                </tr>
-                <tr>
-                    <td>0-9分</td>
-                    <td><span class="status-indicator poor"></span> 较差</td>
-                </tr>
-            </table>
+            <div class="sleep-history-status" id="sleep-history-status">正在加载历史记录...</div>
+            <div id="sleep-history-chart" aria-label="最近10次睡眠质量变化趋势"></div>
+            <div class="sleep-history-note">登录后每次评估会自动保存记录，趋势图展示最近10次睡眠评分与睡眠时长变化。</div>
         </div>
     </div>
 </div>
 
+<script src="{{ url_for('static', filename='vendor/echarts.min.js') }}"></script>
 <script>
+    const isLoggedIn = {{ 'true' if session.get('username') else 'false' }};
+    let sleepHistoryChart = null;
+
     // 输入框回车支持
     document.getElementById('sleep-duration').addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
@@ -503,6 +650,8 @@
         const waitingText = document.getElementById('waiting-text');
         const scoreValue = document.getElementById('score-value');
         const scoreStatus = document.getElementById('score-status');
+        const sleepScaleValue = document.getElementById('sleep-scale-value');
+        const sleepPointer = document.getElementById('sleep-pointer');
 
         // 验证输入
         if (isNaN(duration)) {
@@ -510,6 +659,8 @@
             scoreValue.style.display = 'none';
             scoreStatus.style.display = 'none';
             waitingText.style.display = 'block';
+            sleepScaleValue.textContent = '等待有效输入';
+            sleepPointer.style.display = 'none';
             return;
         }
 
@@ -537,6 +688,15 @@
         waitingText.style.display = 'none';
         scoreValue.textContent = totalScore;
         scoreValue.style.display = 'block';
+        updateSleepScale(totalScore);
+        saveSleepRecord({
+            sleep_duration: duration,
+            sleep_latency: latency,
+            awakenings,
+            morning_feeling: morningFeeling,
+            daytime_function: daytimeFunction,
+            satisfaction
+        });
 
         // 评估结果
         let statusText, statusClass, indicatorClass;
@@ -566,11 +726,192 @@
         }, 10);
     }
 
+    function updateSleepScale(totalScore) {
+        const sleepScaleValue = document.getElementById('sleep-scale-value');
+        const sleepPointer = document.getElementById('sleep-pointer');
+        const sleepPointerValue = document.getElementById('sleep-pointer-value');
+        const minScore = 0;
+        const maxScore = 18;
+        const clampedScore = Math.min(Math.max(totalScore, minScore), maxScore);
+        const position = ((clampedScore - minScore) / (maxScore - minScore)) * 100;
+
+        sleepScaleValue.textContent = `当前得分：${totalScore} / 18`;
+        sleepPointerValue.textContent = totalScore;
+        sleepPointer.style.left = `${position}%`;
+        sleepPointer.style.display = 'flex';
+    }
+
+    function parseJsonResponse(response) {
+        return response.text().then(text => {
+            const data = text ? JSON.parse(text) : {};
+            if (!response.ok) {
+                throw new Error(data.error || data.message || `请求失败：${response.status}`);
+            }
+            return data;
+        });
+    }
+
+    function renderSleepHistory(records, message) {
+        const status = document.getElementById('sleep-history-status');
+        const chartElement = document.getElementById('sleep-history-chart');
+        const safeRecords = records || [];
+
+        if (!window.echarts) {
+            status.textContent = '趋势图组件加载失败';
+            return;
+        }
+
+        if (!sleepHistoryChart) {
+            sleepHistoryChart = echarts.init(chartElement);
+            window.addEventListener('resize', () => sleepHistoryChart && sleepHistoryChart.resize());
+        }
+
+        if (!isLoggedIn) {
+            status.textContent = message || '登录后可查看睡眠质量历史趋势';
+        } else if (!safeRecords.length) {
+            status.textContent = '暂无记录，评估一次后生成趋势';
+        } else {
+            status.textContent = `已记录 ${safeRecords.length} 次`;
+        }
+
+        sleepHistoryChart.setOption({
+            tooltip: {
+                trigger: 'axis',
+                formatter: params => {
+                    const item = params.find(row => row.seriesName === '睡眠评分');
+                    if (!item) {
+                        return '';
+                    }
+                    const record = safeRecords[item.dataIndex];
+                    return [
+                        record.label,
+                        `评分：${record.score} / 18`,
+                        `质量：${record.category}`,
+                        `睡眠时长：${record.sleep_duration.toFixed(1)} 小时`,
+                        `入睡时间：${record.sleep_latency} 分钟`,
+                        `夜醒次数：${record.awakenings} 次`
+                    ].join('<br/>');
+                }
+            },
+            legend: {
+                top: 0,
+                textStyle: { color: '#425466' }
+            },
+            grid: {
+                left: 42,
+                right: 24,
+                top: 48,
+                bottom: 44
+            },
+            xAxis: {
+                type: 'category',
+                data: safeRecords.map(record => record.label),
+                axisLabel: { color: '#5f7185' },
+                axisLine: { lineStyle: { color: '#c9d6e4' } }
+            },
+            yAxis: [
+                {
+                    type: 'value',
+                    name: '评分',
+                    min: 0,
+                    max: 18,
+                    splitLine: { lineStyle: { color: '#e6edf5' } },
+                    axisLabel: { color: '#5f7185' }
+                },
+                {
+                    type: 'value',
+                    name: '小时',
+                    min: 0,
+                    max: 12,
+                    splitLine: { show: false },
+                    axisLabel: { color: '#5f7185' }
+                }
+            ],
+            series: [
+                {
+                    name: '睡眠评分',
+                    type: 'line',
+                    data: safeRecords.map(record => record.score),
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 8,
+                    lineStyle: {
+                        color: '#1e5799',
+                        width: 3
+                    },
+                    itemStyle: { color: '#2989d8' },
+                    areaStyle: { color: 'rgba(41, 137, 216, 0.12)' },
+                    markLine: {
+                        symbol: 'none',
+                        silent: true,
+                        label: {
+                            color: '#2f9e44',
+                            formatter: params => params.name
+                        },
+                        lineStyle: {
+                            color: '#2f9e44',
+                            type: 'dashed',
+                            width: 1.5
+                        },
+                        data: [
+                            { name: '优秀下限 14', yAxis: 14 },
+                            { name: '一般下限 10', yAxis: 10 }
+                        ]
+                    }
+                },
+                {
+                    name: '睡眠时长',
+                    type: 'line',
+                    yAxisIndex: 1,
+                    data: safeRecords.map(record => Number(record.sleep_duration.toFixed(1))),
+                    smooth: true,
+                    symbol: 'diamond',
+                    symbolSize: 8,
+                    lineStyle: {
+                        color: '#40c057',
+                        width: 2.5
+                    },
+                    itemStyle: { color: '#40c057' }
+                }
+            ]
+        });
+    }
+
+    function loadSleepHistory() {
+        fetch('/api/sleep-records')
+            .then(parseJsonResponse)
+            .then(data => renderSleepHistory(data.records, data.message))
+            .catch(error => {
+                document.getElementById('sleep-history-status').textContent = `历史记录加载失败：${error.message}`;
+            });
+    }
+
+    function saveSleepRecord(payload) {
+        if (!isLoggedIn) {
+            renderSleepHistory([], '登录后可保存并查看最近10次睡眠质量变化趋势。');
+            return;
+        }
+
+        fetch('/api/sleep-records', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(parseJsonResponse)
+            .then(data => renderSleepHistory(data.records, data.message))
+            .catch(error => {
+                document.getElementById('sleep-history-status').textContent = `睡眠记录保存失败：${error.message}`;
+            });
+    }
+
     // 初始示例值
     document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('sleep-duration').value = '7.5';
         document.getElementById('sleep-latency').value = '15';
         document.getElementById('awakenings').value = '2';
+        loadSleepHistory();
     });
 </script>
 <!-- ✅ 医学声明页脚 -->

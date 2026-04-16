@@ -231,7 +231,7 @@
 
     .dashboard-grid {
         display: grid;
-        grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+        grid-template-columns: minmax(0, 1.6fr) repeat(2, minmax(260px, 1fr));
         gap: 1em;
         margin-bottom: 1.3em;
     }
@@ -298,6 +298,16 @@
     .dashboard-chart {
         width: 100%;
         height: 320px;
+    }
+
+    @media (max-width: 1100px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .dashboard-grid .dashboard-panel:first-child {
+            grid-column: 1 / -1;
+        }
     }
 
     .dashboard-empty,
@@ -469,6 +479,11 @@
             <div class="dashboard-chart" id="dashboard-distribution-chart"></div>
             <div class="dashboard-empty" id="dashboard-distribution-empty">暂无内容占比数据</div>
         </div>
+        <div class="dashboard-panel">
+            <div class="dashboard-panel-title">信息来源网站占比</div>
+            <div class="dashboard-chart" id="dashboard-source-chart"></div>
+            <div class="dashboard-empty" id="dashboard-source-empty">暂无来源占比数据</div>
+        </div>
     </div>
 
     <div class="dashboard-latest">
@@ -499,14 +514,22 @@
             <h2 class="card-title" data-type="news">新闻中心</h2>
             <a class="card-more" href="/news">更多&gt;&gt;</a>
         </div>
-        <ul class="card-list" id="home-news-list"></ul>
+        <ul class="card-list" id="home-news-list">
+            {% for item in home_cards.news|default([]) %}
+            <li><a href="{{ item.url or '#' }}" target="_blank">{{ item.title }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
     <div class="card-section">
         <div class="card-header">
             <h2 class="card-title" data-type="policy">卫生政策</h2>
             <a class="card-more" href="/policy">更多&gt;&gt;</a>
         </div>
-        <ul class="card-list" id="home-policy-list"></ul>
+        <ul class="card-list" id="home-policy-list">
+            {% for item in home_cards.policy|default([]) %}
+            <li><a href="{{ item.url or '#' }}" target="_blank">{{ item.title }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 
@@ -516,14 +539,22 @@
             <h2 class="card-title" data-type="knowledges">健康知识库</h2>
             <a class="card-more" href="/knowledge">更多&gt;&gt;</a>
         </div>
-        <ul class="card-list" id="home-knowledge-list"></ul>
+        <ul class="card-list" id="home-knowledge-list">
+            {% for item in home_cards.knowledges|default([]) %}
+            <li><a href="{{ item.url or '#' }}" target="_blank">{{ item.title }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
     <div class="card-section">
         <div class="card-header">
             <h2 class="card-title" data-type="notice">通知公告</h2>
             <a class="card-more" href="/notice">更多&gt;&gt;</a>
         </div>
-        <ul class="card-list" id="home-notice-list"></ul>
+        <ul class="card-list" id="home-notice-list">
+            {% for item in home_cards.notice|default([]) %}
+            <li><a href="{{ item.url or '#' }}" target="_blank">{{ item.title }}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 </div>
 
@@ -551,11 +582,24 @@
         knowledges: '#f59f00',
         notice: '#8a63d2'
     };
+    const dashboardSourceColors = [
+        '#007acc',
+        '#2ca58d',
+        '#f59f00',
+        '#8a63d2',
+        '#d9480f',
+        '#1971c2',
+        '#0ca678',
+        '#c2255c',
+        '#495057',
+        '#5c7cfa'
+    ];
     let dashboardTrendChart = null;
     let dashboardDistributionChart = null;
+    let dashboardSourceChart = null;
     let dashboardTrendData = null;
     let dashboardTrendType = 'line';
-    let dashboardLatestItems = {all: []};
+    let dashboardLatestItems = { all: [] };
     let dashboardLatestType = 'all';
 
     function showDashboardEmpty(id, visible) {
@@ -612,7 +656,7 @@
 
         dashboardTrendChart.setOption({
             color: trend.series.map(series => dashboardColors[series.key] || '#007acc'),
-            tooltip: {trigger: 'axis'},
+            tooltip: { trigger: 'axis' },
             legend: {
                 top: 0,
                 data: trend.series.map(series => series.label)
@@ -641,7 +685,7 @@
                 smooth: false,
                 symbolSize: 6,
                 data: series.data,
-                areaStyle: dashboardTrendType === 'line' ? {opacity: 0.08} : undefined,
+                areaStyle: dashboardTrendType === 'line' ? { opacity: 0.08 } : undefined,
                 barMaxWidth: dashboardTrendType === 'bar' ? 18 : undefined
             }))
         }, true);
@@ -697,6 +741,54 @@
             }]
         });
         return dashboardDistributionChart;
+    }
+
+    function renderSourceDistributionChart(distribution) {
+        const hasData = distribution.some(item => item.value > 0);
+        showDashboardEmpty('dashboard-source-empty', !hasData);
+        document.getElementById('dashboard-source-chart').style.display = hasData ? 'block' : 'none';
+
+        if (!hasData || typeof echarts === 'undefined') {
+            return null;
+        }
+
+        if (!dashboardSourceChart) {
+            dashboardSourceChart = echarts.init(document.getElementById('dashboard-source-chart'));
+        }
+
+        dashboardSourceChart.setOption({
+            color: dashboardSourceColors,
+            tooltip: {
+                trigger: 'item',
+                formatter: '{b}<br/>{c} 条 ({d}%)'
+            },
+            legend: {
+                type: 'scroll',
+                bottom: 0,
+                data: distribution.map(item => item.label)
+            },
+            series: [{
+                name: '来源占比',
+                type: 'pie',
+                radius: ['48%', '70%'],
+                center: ['50%', '43%'],
+                avoidLabelOverlap: true,
+                label: {
+                    formatter: params => `${params.name}\n${params.value} 条 ${params.percent}%`,
+                    width: 110,
+                    overflow: 'truncate'
+                },
+                labelLine: {
+                    length: 10,
+                    length2: 8
+                },
+                data: distribution.map(item => ({
+                    name: item.label,
+                    value: item.value
+                }))
+            }]
+        });
+        return dashboardSourceChart;
     }
 
     function renderLatestContent(items) {
@@ -758,16 +850,18 @@
                 renderDashboardSummary(data.summary || []);
                 renderDashboardUpdatedAt(data.updated_at);
 
-                dashboardTrendData = data.trend || {dates: [], series: []};
+                dashboardTrendData = data.trend || { dates: [], series: [] };
                 renderTrendChart(dashboardTrendData);
                 renderDistributionChart(data.distribution || []);
+                renderSourceDistributionChart(data.source_distribution || []);
 
-                dashboardLatestItems = Object.assign({all: data.latest || []}, data.latest_by_type || {});
+                dashboardLatestItems = Object.assign({ all: data.latest || [] }, data.latest_by_type || {});
                 setLatestFilter(dashboardLatestType);
 
                 const resizeCharts = () => {
                     if (dashboardTrendChart) dashboardTrendChart.resize();
                     if (dashboardDistributionChart) dashboardDistributionChart.resize();
+                    if (dashboardSourceChart) dashboardSourceChart.resize();
                 };
                 window.addEventListener('resize', resizeCharts);
             })
@@ -865,14 +959,39 @@
 
 <!-- 内容加载 -->
 <script>
+    function parseListJsonResponse(response) {
+        if (typeof parseJsonResponse === 'function') {
+            return parseJsonResponse(response);
+        }
+
+        return response.text().then(text => {
+            let data;
+            try {
+                data = text ? JSON.parse(text) : {};
+            } catch (err) {
+                throw new Error(`接口返回的不是 JSON：HTTP ${response.status}`);
+            }
+            if (!response.ok) {
+                throw new Error(data.error || `请求失败：${response.status}`);
+            }
+            return data;
+        });
+    }
+
     function loadList(url, containerId) {
+        const ul = document.getElementById(containerId);
+
         fetch(url)
-            .then(parseJsonResponse)
+            .then(parseListJsonResponse)
             .then(data => {
                 if (!Array.isArray(data)) {
                     throw new Error(data.error || '接口数据格式错误');
                 }
-                const ul = document.getElementById(containerId);
+                ul.innerHTML = '';
+                if (data.length === 0) {
+                    ul.innerText = '暂无内容';
+                    return;
+                }
                 data.forEach(item => {
                     const li = document.createElement('li');
                     const link = document.createElement('a');
@@ -884,7 +1003,9 @@
                 });
             })
             .catch(err => {
-                document.getElementById(containerId).innerText = '加载失败：' + err.message;
+                if (!ul.querySelector('li')) {
+                    ul.innerText = '加载失败：' + err.message;
+                }
             });
     }
 
@@ -895,7 +1016,8 @@
 </script>
 
 <!-- 页脚 -->
-<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+<footer
+    style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
     <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。
     </p>
 </footer>

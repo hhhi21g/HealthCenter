@@ -1,5 +1,7 @@
 {% extends "base.html" %}
+{% block title %}应用-疾病地图{% endblock %}
 {% block content %}
+
 
 <style>
     .disease-map-page {
@@ -304,6 +306,30 @@
         gap: 10px;
     }
 
+    .evidence-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .evidence-item {
+        background: #f6faf9;
+        border: 1px solid #d5e7e3;
+        border-radius: 8px;
+        color: #30484c;
+        line-height: 1.6;
+        padding: 10px;
+    }
+
+    .evidence-item a {
+        color: #176b75;
+        font-weight: 700;
+        text-decoration: none;
+    }
+
+    .evidence-item a:hover {
+        text-decoration: underline;
+    }
+
     .empty-state,
     .map-error {
         background: #fff7ed;
@@ -320,6 +346,7 @@
     }
 
     @media (max-width: 1100px) {
+
         .map-shell,
         .map-hero {
             grid-template-columns: 1fr;
@@ -415,9 +442,9 @@
 <script>
     const state = {
         mode: 'category',
-        category: '慢性病预防',
+        category: '蚊媒与虫媒疾病',
         season: 'summer',
-        population: 'elderly',
+        population: 'children',
         province: '全国',
         search: ''
     };
@@ -425,6 +452,7 @@
     let diseaseMapData = null;
     let chinaGeoJson = null;
     let diseaseChart = null;
+    const visiblePopulationKeys = ['children'];
 
     const categoryColors = {
         '呼吸道传染病': '#3d7ea6',
@@ -512,10 +540,18 @@
             return disease.category === state.category;
         }
 
+        if (state.mode === 'season') {
+            return getActiveKeywords().includes(disease.name);
+        }
+
         return getActiveKeywords().some(keyword => diseaseMatchesKeyword(disease, keyword));
     }
 
     function profileMatchesCurrentMode(profile) {
+        if (state.mode === 'season') {
+            return (profile.recommended || []).some(name => getActiveKeywords().includes(name));
+        }
+
         const recommendedDiseases = (profile.recommended || [])
             .map(getDiseaseByName)
             .filter(Boolean);
@@ -535,14 +571,30 @@
 
     function getModeColor() {
         if (state.mode === 'category') {
-            return categoryColors[state.category] || '#176b75';
+            return '#45b39d';
         }
 
         if (state.mode === 'season') {
-            return state.season === 'summer' ? '#e67700' : state.season === 'winter' ? '#3d7ea6' : '#2f9e8f';
+            return '#be123c';
         }
 
         return '#6f65b8';
+    }
+
+    function renderRecommendedTags(recommended) {
+        if (!recommended || !recommended.length) {
+            return '<div class="empty-state">暂无可公开核验的省级疾病推荐。</div>';
+        }
+
+        return recommended
+            .map(name => `<span class="theme-tag">${escapeHtml(name)}</span>`)
+            .join('');
+    }
+
+    function getRecommendedText(profile) {
+        return (profile.recommended || []).length
+            ? profile.recommended.join('、')
+            : '暂无可公开核验的省级疾病推荐';
     }
 
     function initControls() {
@@ -560,7 +612,9 @@
             .join('');
         seasonSelect.value = state.season;
 
-        populationSelect.innerHTML = Object.entries(diseaseMapData.population_groups)
+        populationSelect.innerHTML = visiblePopulationKeys
+            .map(key => [key, diseaseMapData.population_groups[key]])
+            .filter(([, value]) => value)
             .map(([key, value]) => `<option value="${escapeHtml(key)}">${escapeHtml(value.label)}</option>`)
             .join('');
         populationSelect.value = state.population;
@@ -571,6 +625,7 @@
                 document.querySelectorAll('[data-mode]').forEach(item => {
                     item.classList.toggle('active', item.dataset.mode === state.mode);
                 });
+                resetActiveModeSelection();
                 updateControlVisibility();
                 renderAll();
             });
@@ -602,6 +657,29 @@
         });
 
         updateControlVisibility();
+    }
+
+    function resetActiveModeSelection() {
+        const categorySelect = document.getElementById('category-select');
+        const seasonSelect = document.getElementById('season-select');
+        const populationSelect = document.getElementById('population-select');
+
+        if (state.mode === 'category' && categorySelect.options.length) {
+            state.category = categorySelect.options[0].value;
+            categorySelect.value = state.category;
+        }
+
+        if (state.mode === 'season' && seasonSelect.options.length) {
+            state.season = seasonSelect.options[0].value;
+            seasonSelect.value = state.season;
+        }
+
+        if (state.mode === 'population' && populationSelect.options.length) {
+            state.population = populationSelect.options[0].value;
+            populationSelect.value = state.population;
+        }
+
+        state.province = '全国';
     }
 
     function updateControlVisibility() {
@@ -641,7 +719,7 @@
             .filter(name => profileMatchesCurrentMode(profiles[name]))
             .map(name => {
                 const center = getProvinceCenter(name);
-                return center ? {name, coord: center, value: getActiveLabel()} : null;
+                return center ? { name, coord: center, value: getActiveLabel() } : null;
             })
             .filter(Boolean);
 
@@ -653,8 +731,7 @@
                     if (!profile) {
                         return params.name || '';
                     }
-                    const themes = (profile.themes || []).slice(0, 4).join('、');
-                    return `${params.name}<br/>推荐关注：${themes}`;
+                    return `${params.name}<br/>推荐关注：${escapeHtml(getRecommendedText(profile))}`;
                 }
             },
             series: [{
@@ -663,7 +740,7 @@
                 map: 'china',
                 roam: true,
                 zoom: 1.12,
-                layoutCenter: ['50%', '52%'],
+                layoutCenter: ['50%', '65%'],
                 layoutSize: '95%',
                 selectedMode: 'single',
                 data: provinceData,
@@ -714,7 +791,7 @@
         }, true);
 
         document.getElementById('map-note').textContent =
-            `当前查看：${getActiveLabel()}。高亮省份表示可优先了解相关防控知识，点击省份查看具体行动建议。`;
+            `当前查看：${getActiveLabel()}。高亮省份表示可优先了解相关防控知识，点击省份查看推荐关注和公开依据。`;
     }
 
     function renderProvincePanel() {
@@ -751,6 +828,16 @@
             return;
         }
 
+        const recommendedHtml = renderRecommendedTags(profile.recommended);
+        const evidenceHtml = (profile.evidence || []).length
+            ? profile.evidence.map(item => `
+                <div class="evidence-item">
+                    <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.title)}</a>
+                    <div>${escapeHtml(item.note)}</div>
+                </div>
+            `).join('')
+            : '<div class="empty-state">当前仅保留有公开来源可核验的省级疾病推荐；该地区暂未配置省级特异疾病依据。</div>';
+
         panel.innerHTML = `
             <div>
                 <h2 class="panel-title">${escapeHtml(state.province)}健康预防提示</h2>
@@ -758,15 +845,11 @@
             </div>
             <div>
                 <div class="section-heading"><h2>推荐关注</h2></div>
-                <div class="tag-list">${(profile.themes || []).map(theme => `<span class="theme-tag">${escapeHtml(theme)}</span>`).join('')}</div>
+                <div class="tag-list">${recommendedHtml}</div>
             </div>
             <div>
-                <div class="section-heading"><h2>重点预防行动</h2></div>
-                <ul class="action-list">${(profile.actions || []).map(action => `<li>${escapeHtml(action)}</li>`).join('')}</ul>
-            </div>
-            <div>
-                <div class="section-heading"><h2>推荐阅读</h2></div>
-                <div class="tag-list">${(profile.recommended || []).map(name => `<span class="theme-tag">${escapeHtml(name)}</span>`).join('')}</div>
+                <div class="section-heading"><h2>公开依据</h2></div>
+                <div class="evidence-list">${evidenceHtml}</div>
             </div>
         `;
     }
@@ -776,7 +859,10 @@
         const profile = getProfiles()[state.province];
 
         if (profile && profile.recommended && profile.recommended.length) {
-            const recommended = profile.recommended.map(getDiseaseByName).filter(Boolean);
+            const recommended = profile.recommended
+                .map(getDiseaseByName)
+                .filter(Boolean)
+                .filter(diseaseMatchesCurrentMode);
             const merged = [...recommended, ...diseases];
             const names = new Set();
             diseases = merged.filter(disease => {

@@ -18,20 +18,21 @@
             background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
             color: #333;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
         .content {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: calc(100vh - 70px);
-            padding: 20px;
+            min-height: calc(100vh - 70px);
+            padding: 12px 18px;
         }
 
         .calculator-container {
-            display: flex;
-            max-width: 1000px;
+            display: grid;
+            grid-template-columns: minmax(330px, 0.9fr) minmax(500px, 1.15fr) minmax(400px, 1fr);
+            max-width: 1460px;
             width: 100%;
             background: white;
             border-radius: 15px;
@@ -41,31 +42,42 @@
         }
 
         .calculator-section {
-            flex: 1;
-            padding: 30px;
+            padding: 34px 36px;
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-height: 0;
+        }
+
+        .result-section {
+            padding: 34px 36px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: #f8faff;
+            border-left: 1px solid #e1e8f0;
+            min-height: 0;
         }
 
         .info-section {
-            flex: 1;
             background: linear-gradient(135deg, #1e5799, #2989d8);
             color: white;
-            padding: 30px;
+            padding: 34px 36px;
             display: flex;
             flex-direction: column;
+            justify-content: center;
+            min-height: 0;
         }
 
         h1, h2 {
             position: relative;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            padding-bottom: 14px;
+            margin-bottom: 24px;
         }
 
         h1 {
             color: #1e5799;
-            font-size: 2rem;
+            font-size: 2.25rem;
         }
 
         h1::after {
@@ -80,7 +92,12 @@
         }
 
         h2 {
-            font-size: 1.8rem;
+            font-size: 2rem;
+        }
+
+        h3 {
+            font-size: 1.32rem;
+            margin-bottom: 12px;
         }
 
         h2::after {
@@ -103,17 +120,23 @@
             margin-bottom: 8px;
             font-weight: 600;
             color: #2c3e50;
-            font-size: 1rem;
+            font-size: 1.14rem;
         }
 
         input, select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 16px;
             border: 2px solid #e1e5eb;
             border-radius: 8px;
-            font-size: 1rem;
+            font-size: 1.14rem;
             transition: all 0.3s ease;
             background: #f8fafc;
+        }
+
+        select:disabled {
+            color: #6b7c8c;
+            background: #edf2f7;
+            cursor: not-allowed;
         }
 
         input:focus, select:focus {
@@ -124,12 +147,12 @@
 
         button {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: linear-gradient(to right, #1e5799, #2989d8);
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 1.1rem;
+            font-size: 1.18rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -144,52 +167,245 @@
         }
 
         .result-container {
-            margin-top: 25px;
-            padding: 20px;
-            background: #f8faff;
-            border-radius: 10px;
+            margin-top: 0;
+            padding: 0;
+            background: transparent;
+            border-radius: 0;
             text-align: center;
-            border: 1px solid #e1e8f0;
-            min-height: 150px;
+            border: 0;
+            min-height: 0;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-start;
+        }
+
+        .result-container > p {
+            color: #39546d;
+            font-size: 1.16rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .water-visual-panel {
+            margin-top: 22px;
+            display: grid;
+            grid-template-columns: minmax(190px, 0.85fr) minmax(0, 1.15fr);
+            gap: 24px;
+            align-items: center;
+            text-align: left;
+        }
+
+        .water-ring {
+            --progress: 0deg;
+            position: relative;
+            width: 196px;
+            height: 196px;
+            border-radius: 50%;
+            background: conic-gradient(#2f9ed8 var(--progress), #dcecf7 0deg);
+            display: grid;
+            place-items: center;
+            margin: 0 auto;
+            transition: background 0.35s ease;
+        }
+
+        .water-ring::before {
+            content: '';
+            width: 142px;
+            height: 142px;
+            border-radius: 50%;
+            background: #f8faff;
+            position: absolute;
+        }
+
+        .water-ring-inner {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+        }
+
+        .water-progress-value {
+            color: #1e5799;
+            font-size: 2.35rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .water-progress-label {
+            color: #607486;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-top: 6px;
+        }
+
+        .water-progress-meta {
+            display: grid;
+            gap: 12px;
+            color: #3f5265;
+            font-size: 1.16rem;
+        }
+
+        .water-progress-meta strong {
+            color: #1e5799;
+        }
+
+        .cup-progress {
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .cup-progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: #39546d;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .cup-grid {
+            display: grid;
+            grid-template-columns: repeat(8, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .water-cup {
+            height: 48px;
+            border: 2px solid #9ccbe8;
+            border-top: 0;
+            border-radius: 4px 4px 8px 8px;
+            position: relative;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .water-cup::before {
+            content: '';
+            position: absolute;
+            inset: auto 0 0;
+            height: var(--fill, 0%);
+            background: linear-gradient(180deg, #74c0fc, #2f9ed8);
+            transition: height 0.35s ease;
+        }
+
+        .water-note {
+            color: #607486;
+            font-size: 1rem;
+            line-height: 1.45;
+            margin-top: 10px;
+        }
+
+        .water-actions {
+            margin-top: 24px;
+            text-align: left;
+        }
+
+        .water-actions-title,
+        .water-records-title {
+            color: #39546d;
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .water-action-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .water-action-buttons button {
+            margin: 0;
+            padding: 12px 10px;
+            border-radius: 6px;
+            font-size: 1.08rem;
+            box-shadow: none;
+        }
+
+        .water-action-buttons button:disabled {
+            background: #c9d6e4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .water-records {
+            margin-top: 22px;
+            text-align: left;
+        }
+
+        .water-record-list {
+            display: grid;
+            gap: 10px;
+            max-height: 170px;
+            overflow-y: auto;
+        }
+
+        .water-record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: #3f5265;
+            background: #eef7fc;
+            border: 1px solid #d4e9f5;
+            border-radius: 6px;
+            font-size: 1.06rem;
+            padding: 11px 12px;
+        }
+
+        .water-record-empty {
+            color: #607486;
+            background: #f3f7fb;
+            border-radius: 6px;
+            font-size: 1.06rem;
+            line-height: 1.45;
+            padding: 12px;
+        }
+
+        .water-storage-status {
+            color: #607486;
+            font-size: 1rem;
+            line-height: 1.45;
+            margin-top: 10px;
         }
 
         .water-value {
-            font-size: 2.8rem;
+            font-size: 3.5rem;
             font-weight: 800;
-            margin: 10px 0;
+            margin: 6px 0;
             color: #1e5799;
             line-height: 1.1;
         }
 
         .water-unit {
-            font-size: 1.2rem;
+            font-size: 1.42rem;
             font-weight: 600;
             color: #555;
-            margin-top: 5px;
+            margin-top: 4px;
         }
 
         .waiting-text {
-            font-size: 1.2rem;
+            font-size: 1.42rem;
             color: #666;
         }
 
         .formula {
             background: rgba(255, 255, 255, 0.15);
-            padding: 15px;
+            padding: 18px;
             border-radius: 10px;
-            font-size: 1.2rem;
+            font-size: 1.28rem;
             font-weight: 600;
             text-align: center;
-            margin: 20px 0;
+            margin: 8px 0 20px;
+            line-height: 1.55;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             overflow: hidden;
@@ -198,15 +414,15 @@
         th {
             background: rgba(255, 255, 255, 0.2);
             text-align: left;
-            padding: 12px 15px;
+            padding: 13px 14px;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1.07rem;
         }
 
         td {
-            padding: 10px 15px;
+            padding: 11px 14px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 0.9rem;
+            font-size: 1.04rem;
         }
 
         tr:last-child td {
@@ -214,11 +430,11 @@
         }
 
         .water-value {
-            font-size: 2.8rem;
+            font-size: 3.5rem;
         }
 
         .waiting-text {
-            font-size: 2.8rem;
+            font-size: 3.5rem;
         }
 
         @keyframes fadeIn {
@@ -244,13 +460,16 @@
             }
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1180px) {
             .calculator-container {
-                flex-direction: column;
-                max-width: 600px;
+                grid-template-columns: 1fr;
+                max-width: 720px;
+                height: auto;
+                min-height: 0;
+                max-height: none;
             }
 
-            .calculator-section, .info-section {
+            .calculator-section, .result-section, .info-section {
                 padding: 25px;
             }
 
@@ -258,6 +477,102 @@
                 height: auto;
                 padding: 20px;
                 overflow-y: auto;
+            }
+
+            .result-section {
+                border-left: 0;
+                border-top: 1px solid #e1e8f0;
+            }
+        }
+
+        @media (min-width: 1181px) and (max-height: 760px) {
+            .calculator-section,
+            .result-section,
+            .info-section {
+                padding: 22px 24px;
+            }
+
+            h1 {
+                font-size: 1.65rem;
+            }
+
+            h2 {
+                font-size: 1.5rem;
+            }
+
+            .input-group {
+                margin-bottom: 12px;
+            }
+
+            label,
+            input,
+            select {
+                font-size: 0.94rem;
+            }
+
+            input,
+            select {
+                padding: 9px 12px;
+            }
+
+            button {
+                padding: 11px;
+                font-size: 1rem;
+            }
+
+            .water-ring {
+                width: 132px;
+                height: 132px;
+            }
+
+            .water-ring::before {
+                width: 94px;
+                height: 94px;
+            }
+
+            .water-value,
+            .waiting-text {
+                font-size: 2.35rem;
+            }
+
+            .water-progress-value {
+                font-size: 1.6rem;
+            }
+
+            .water-visual-panel {
+                margin-top: 12px;
+                grid-template-columns: minmax(125px, 0.85fr) minmax(0, 1.15fr);
+                gap: 14px;
+            }
+
+            .cup-progress,
+            .water-actions,
+            .water-records {
+                margin-top: 12px;
+            }
+
+            .water-cup {
+                height: 30px;
+            }
+
+            .water-record-list {
+                max-height: 102px;
+            }
+
+            .formula {
+                padding: 12px;
+                font-size: 1rem;
+                margin: 4px 0 14px;
+            }
+
+            th {
+                padding: 8px 10px;
+                font-size: 0.84rem;
+            }
+
+            td {
+                padding: 6px 10px;
+                font-size: 0.82rem;
             }
         }
 
@@ -281,6 +596,15 @@
 
             .water-value {
                 font-size: 2.2rem;
+            }
+
+            .water-visual-panel {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .water-action-buttons {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
 
             .formula {
@@ -403,11 +727,56 @@
             </div>
 
             <button onclick="calculateWater()">计算推荐饮水量</button>
+        </div>
 
+        <!-- 结果和记录部分 -->
+        <div class="result-section">
             <div class="result-container" id="result">
                 <p>您的每日饮水量推荐值为：</p>
                 <div class="waiting-text" id="waiting-text">--</div>
                 <div class="water-value" id="water-value"></div>
+                <div class="water-unit" id="water-unit"></div>
+
+                <div class="water-visual-panel" aria-label="饮水目标进度">
+                    <div class="water-ring" id="water-ring">
+                        <div class="water-ring-inner">
+                            <div class="water-progress-value" id="water-progress-value">0%</div>
+                            <div class="water-progress-label">目标完成度</div>
+                        </div>
+                    </div>
+                    <div class="water-progress-meta">
+                        <div>今日建议：<strong id="water-target-text">-- ml</strong></div>
+                        <div>已记录：<strong id="water-current-text">-- ml</strong></div>
+                        <div>还差：<strong id="water-remaining-text">-- ml</strong></div>
+                    </div>
+                </div>
+
+                <div class="cup-progress" aria-label="水杯进度">
+                    <div class="cup-progress-header">
+                        <span>水杯进度</span>
+                        <span id="cup-summary">按 250 ml/杯估算</span>
+                    </div>
+                    <div class="cup-grid" id="cup-grid"></div>
+                    <div class="water-note">水杯按 250 ml/杯估算，按钮记录后会同步刷新进度。</div>
+                </div>
+
+                <div class="water-actions">
+                    <div class="water-actions-title">快速记录饮水</div>
+                    <div class="water-action-buttons">
+                        <button type="button" data-water-amount="100">+100 ml</button>
+                        <button type="button" data-water-amount="200">+200 ml</button>
+                        <button type="button" data-water-amount="250">+250 ml</button>
+                        <button type="button" data-water-amount="500">+500 ml</button>
+                    </div>
+                    <div class="water-storage-status" id="water-storage-status">登录后可保存今日目标和饮水记录。</div>
+                </div>
+
+                <div class="water-records">
+                    <div class="water-records-title">今日饮水记录</div>
+                    <div class="water-record-list" id="water-record-list">
+                        <div class="water-record-empty">暂无饮水记录。</div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -467,7 +836,7 @@
                 </tr>
                 <tr>
                     <td>怀孕/哺乳</td>
-                    <td>额外增加30%</td>
+                    <td>仅女性可选，是时增加30%</td>
                 </tr>
             </table>
         </div>
@@ -475,6 +844,10 @@
 </div>
 
 <script>
+    const isLoggedIn = {{ 'true' if session.get('username') else 'false' }};
+    let currentTargetMl = 0;
+    let currentIntakeMl = 0;
+
     const activityMult = {
         sedentary: 1.0,
         light: 1.1,
@@ -496,12 +869,32 @@
         document.getElementById('weight').placeholder = `例如：${wUnit === 'kg' ? '70' : '154'}`;
     });
 
+    document.getElementById('gender').addEventListener('change', enforcePregnancyAvailability);
+
     // 输入框回车支持
     document.getElementById('weight').addEventListener('keyup', function (event) {
         if (event.key === 'Enter') {
             calculateWater();
         }
     });
+
+    document.querySelectorAll('[data-water-amount]').forEach(button => {
+        button.addEventListener('click', () => {
+            addWaterRecord(Number(button.dataset.waterAmount));
+        });
+    });
+
+    function enforcePregnancyAvailability() {
+        const gender = document.getElementById('gender').value;
+        const pregnancySelect = document.getElementById('pregnancy');
+        if (gender === 'male') {
+            pregnancySelect.value = 'no';
+            pregnancySelect.disabled = true;
+            return;
+        }
+
+        pregnancySelect.disabled = false;
+    }
 
     function calculateWater() {
         const unit = document.getElementById('unit').value;
@@ -510,7 +903,8 @@
         let weight = parseFloat(weightInput.value);
         const activity = activityMult[document.getElementById('activity').value];
         const climate = climateMult[document.getElementById('climate').value];
-        const pregnancy = document.getElementById('pregnancy').value === 'yes' ? 1.3 : 1.0;
+        const pregnancyStatus = gender === 'male' ? 'no' : document.getElementById('pregnancy').value;
+        const pregnancy = pregnancyStatus === 'yes' ? 1.3 : 1.0;
         const waitingText = document.getElementById('waiting-text');
         const waterValue = document.getElementById('water-value');
         const waterUnit = document.getElementById('water-unit');
@@ -521,6 +915,7 @@
             waterValue.style.display = 'none';
             waterUnit.style.display = 'none';
             waitingText.style.display = 'block';
+            updateWaterVisualization(0, 0);
             return;
         }
 
@@ -537,13 +932,31 @@
         const totalOz = baseOz * activity * climate * pregnancy;
         const totalMl = totalOz * 29.5735;
         const totalL = (totalMl / 1000).toFixed(2);
+        const targetMl = Math.round(totalMl);
 
         // 显示结果
         waitingText.style.display = 'none';
         waterValue.textContent = totalL;
         waterValue.style.display = 'block';
-        waterUnit.textContent = `升 (L) ≈ ${Math.round(totalMl)} 毫升 (ml)`;
+        waterUnit.textContent = `升 (L) ≈ ${targetMl} 毫升 (ml)`;
         waterUnit.style.display = 'block';
+        currentTargetMl = targetMl;
+
+        if (isLoggedIn) {
+            saveWaterTarget({
+                unit_system: unit,
+                gender,
+                weight_value: weight,
+                activity_level: document.getElementById('activity').value,
+                climate_level: document.getElementById('climate').value,
+                pregnancy_status: pregnancyStatus
+            });
+        } else {
+            currentIntakeMl = 0;
+            updateWaterVisualization(targetMl, currentIntakeMl);
+            setWaterStorageStatus('登录后可保存今日目标和饮水记录。');
+            updateWaterActionButtons();
+        }
 
         // 添加动画效果
         const resultContainer = document.getElementById('result');
@@ -553,9 +966,186 @@
         }, 10);
     }
 
+    function getProgressColor(percent) {
+        if (percent >= 120) {
+            return '#f59f00';
+        }
+        if (percent >= 80) {
+            return '#2f9e44';
+        }
+        if (percent >= 40) {
+            return '#2f9ed8';
+        }
+        return '#7aa7c7';
+    }
+
+    function updateWaterVisualization(targetMl, currentMl) {
+        const ring = document.getElementById('water-ring');
+        const progressValue = document.getElementById('water-progress-value');
+        const targetText = document.getElementById('water-target-text');
+        const currentText = document.getElementById('water-current-text');
+        const remainingText = document.getElementById('water-remaining-text');
+        const cupSummary = document.getElementById('cup-summary');
+        const cupGrid = document.getElementById('cup-grid');
+        const percent = targetMl > 0 ? Math.round(currentMl / targetMl * 100) : 0;
+        const cappedPercent = Math.min(percent, 120);
+        const progressDegrees = Math.min(cappedPercent, 100) * 3.6;
+        const remainingMl = Math.max(targetMl - currentMl, 0);
+        const progressColor = getProgressColor(percent);
+        const cupSize = 250;
+        const totalCups = targetMl > 0 ? Math.max(Math.ceil(targetMl / cupSize), 1) : 8;
+        const visibleCups = Math.min(totalCups, 12);
+
+        ring.style.setProperty('--progress', `${progressDegrees}deg`);
+        ring.style.background = `conic-gradient(${progressColor} var(--progress), #dcecf7 0deg)`;
+        progressValue.textContent = `${percent}%`;
+        targetText.textContent = targetMl ? `${targetMl} ml` : '-- ml';
+        currentText.textContent = `${currentMl} ml`;
+        remainingText.textContent = targetMl ? `${remainingMl} ml` : '-- ml';
+        cupSummary.textContent = targetMl ? `约 ${totalCups} 杯，每杯 250 ml` : '按 250 ml/杯估算';
+
+        cupGrid.innerHTML = Array.from({ length: visibleCups }, (_, index) => {
+            const fill = Math.max(Math.min((currentMl - index * cupSize) / cupSize, 1), 0) * 100;
+            return `<div class="water-cup" style="--fill: ${fill}%"></div>`;
+        }).join('');
+    }
+
+    function parseJsonResponse(response) {
+        return response.text().then(text => {
+            const data = text ? JSON.parse(text) : {};
+            if (!response.ok) {
+                throw new Error(data.error || data.message || `请求失败：${response.status}`);
+            }
+            return data;
+        });
+    }
+
+    function setWaterStorageStatus(message) {
+        document.getElementById('water-storage-status').textContent = message;
+    }
+
+    function updateWaterActionButtons() {
+        document.querySelectorAll('[data-water-amount]').forEach(button => {
+            button.disabled = !isLoggedIn || !currentTargetMl;
+        });
+    }
+
+    function renderWaterRecords(records) {
+        const list = document.getElementById('water-record-list');
+        if (!records || !records.length) {
+            list.innerHTML = '<div class="water-record-empty">暂无饮水记录。</div>';
+            return;
+        }
+
+        list.innerHTML = records.map(record => `
+            <div class="water-record-item">
+                <span>${record.label || '--:--'}</span>
+                <strong>+${record.amount_ml} ml</strong>
+            </div>
+        `).join('');
+    }
+
+    function renderWaterState(data) {
+        const waitingText = document.getElementById('waiting-text');
+        const waterValue = document.getElementById('water-value');
+        const waterUnit = document.getElementById('water-unit');
+        currentTargetMl = data.target_ml || 0;
+        currentIntakeMl = data.current_ml || 0;
+
+        if (currentTargetMl) {
+            waitingText.style.display = 'none';
+            waterValue.textContent = (currentTargetMl / 1000).toFixed(2);
+            waterValue.style.display = 'block';
+            waterUnit.textContent = `升 (L) ≈ ${currentTargetMl} 毫升 (ml)`;
+            waterUnit.style.display = 'block';
+        } else {
+            waitingText.style.display = 'block';
+            waterValue.style.display = 'none';
+            waterUnit.style.display = 'none';
+        }
+
+        updateWaterVisualization(currentTargetMl, currentIntakeMl);
+        renderWaterRecords(data.records || []);
+        updateWaterActionButtons();
+
+        if (!data.authenticated) {
+            setWaterStorageStatus(data.message || '登录后可保存今日目标和饮水记录。');
+            return;
+        }
+
+        if (!currentTargetMl) {
+            setWaterStorageStatus('请先计算今日推荐饮水量。');
+            return;
+        }
+
+        setWaterStorageStatus(`今日已记录 ${currentIntakeMl} ml，完成 ${data.progress_percent || 0}%。`);
+    }
+
+    function loadWaterState() {
+        fetch('/api/water-intake/today')
+            .then(parseJsonResponse)
+            .then(renderWaterState)
+            .catch(error => {
+                setWaterStorageStatus(`饮水记录加载失败：${error.message}`);
+                updateWaterActionButtons();
+            });
+    }
+
+    function saveWaterTarget(payload) {
+        fetch('/api/water-intake/target', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(parseJsonResponse)
+            .then(data => {
+                renderWaterState(data);
+                setWaterStorageStatus('今日推荐饮水量已保存。');
+            })
+            .catch(error => {
+                updateWaterVisualization(currentTargetMl, currentIntakeMl);
+                setWaterStorageStatus(`今日目标保存失败：${error.message}`);
+                updateWaterActionButtons();
+            });
+    }
+
+    function addWaterRecord(amountMl) {
+        if (!isLoggedIn) {
+            setWaterStorageStatus('登录后可记录饮水量。');
+            return;
+        }
+
+        if (!currentTargetMl) {
+            setWaterStorageStatus('请先计算今日推荐饮水量。');
+            return;
+        }
+
+        fetch('/api/water-intake/record', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({amount_ml: amountMl})
+        })
+            .then(parseJsonResponse)
+            .then(data => {
+                renderWaterState(data);
+                setWaterStorageStatus(`已记录 +${amountMl} ml。`);
+            })
+            .catch(error => {
+                setWaterStorageStatus(`饮水记录保存失败：${error.message}`);
+            });
+    }
+
     // 初始示例值
     document.addEventListener('DOMContentLoaded', function () {
         document.getElementById('weight').value = '70';
+        enforcePregnancyAvailability();
+        updateWaterVisualization(0, 0);
+        updateWaterActionButtons();
+        loadWaterState();
     });
 </script>
 <!-- ✅ 医学声明页脚 -->
