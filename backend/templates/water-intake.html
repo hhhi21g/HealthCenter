@@ -17,32 +17,39 @@
         body {
             background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
             color: #333;
-            min-height: 100vh;
-            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
         }
 
         .content {
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: calc(100vh - 70px);
-            padding: 12px 18px;
+            flex: 1 1 auto;
+            min-height: 0;
+            overflow: hidden;
+            padding: 10px 18px;
         }
 
         .calculator-container {
             display: grid;
             grid-template-columns: minmax(330px, 0.9fr) minmax(500px, 1.15fr) minmax(400px, 1fr);
+            height: auto;
+            max-height: 100%;
             max-width: 1460px;
+            min-height: min(700px, 100%);
             width: 100%;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 30px rgba(30, 87, 153, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 10px 24px rgba(30, 87, 153, 0.18);
             overflow: hidden;
             animation: fadeIn 0.8s ease-out;
         }
 
         .calculator-section {
-            padding: 34px 36px;
+            padding: 32px 34px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -50,7 +57,7 @@
         }
 
         .result-section {
-            padding: 34px 36px;
+            padding: 32px 34px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -62,7 +69,7 @@
         .info-section {
             background: linear-gradient(135deg, #1e5799, #2989d8);
             color: white;
-            padding: 34px 36px;
+            padding: 32px 34px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -71,13 +78,13 @@
 
         h1, h2 {
             position: relative;
-            padding-bottom: 14px;
-            margin-bottom: 24px;
+            padding-bottom: 8px;
+            margin-bottom: 14px;
         }
 
         h1 {
             color: #1e5799;
-            font-size: 2.25rem;
+            font-size: 1.9rem;
         }
 
         h1::after {
@@ -92,12 +99,12 @@
         }
 
         h2 {
-            font-size: 2rem;
+            font-size: 1.66rem;
         }
 
         h3 {
-            font-size: 1.32rem;
-            margin-bottom: 12px;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
         }
 
         h2::after {
@@ -112,23 +119,23 @@
         }
 
         .input-group {
-            margin-bottom: 18px;
+            margin-bottom: 13px;
         }
 
         label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
             font-weight: 600;
             color: #2c3e50;
-            font-size: 1.14rem;
+            font-size: 1rem;
         }
 
         input, select {
             width: 100%;
-            padding: 16px;
+            padding: 10px 12px;
             border: 2px solid #e1e5eb;
             border-radius: 8px;
-            font-size: 1.14rem;
+            font-size: 1rem;
             transition: all 0.3s ease;
             background: #f8fafc;
         }
@@ -147,12 +154,12 @@
 
         button {
             width: 100%;
-            padding: 16px;
+            padding: 11px;
             background: linear-gradient(to right, #1e5799, #2989d8);
             color: #fff;
             border: none;
             border-radius: 8px;
-            font-size: 1.18rem;
+            font-size: 1.08rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -181,16 +188,16 @@
 
         .result-container > p {
             color: #39546d;
-            font-size: 1.16rem;
+            font-size: 1.06rem;
             font-weight: 700;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
 
         .water-visual-panel {
-            margin-top: 22px;
+            margin-top: 18px;
             display: grid;
-            grid-template-columns: minmax(190px, 0.85fr) minmax(0, 1.15fr);
-            gap: 24px;
+            grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1.2fr);
+            gap: 16px;
             align-items: center;
             text-align: left;
         }
@@ -198,8 +205,8 @@
         .water-ring {
             --progress: 0deg;
             position: relative;
-            width: 196px;
-            height: 196px;
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
             background: conic-gradient(#2f9ed8 var(--progress), #dcecf7 0deg);
             display: grid;
@@ -210,8 +217,8 @@
 
         .water-ring::before {
             content: '';
-            width: 142px;
-            height: 142px;
+            width: 106px;
+            height: 106px;
             border-radius: 50%;
             background: #f8faff;
             position: absolute;
@@ -225,23 +232,23 @@
 
         .water-progress-value {
             color: #1e5799;
-            font-size: 2.35rem;
+            font-size: 1.95rem;
             font-weight: 800;
             line-height: 1;
         }
 
         .water-progress-label {
             color: #607486;
-            font-size: 1rem;
+            font-size: 0.88rem;
             font-weight: 600;
             margin-top: 6px;
         }
 
         .water-progress-meta {
             display: grid;
-            gap: 12px;
+            gap: 6px;
             color: #3f5265;
-            font-size: 1.16rem;
+            font-size: 1rem;
         }
 
         .water-progress-meta strong {
@@ -249,7 +256,7 @@
         }
 
         .cup-progress {
-            margin-top: 24px;
+            margin-top: 18px;
             text-align: left;
         }
 
@@ -257,21 +264,22 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             color: #39546d;
-            font-size: 1.1rem;
+            font-size: 0.98rem;
             font-weight: 700;
-            margin-bottom: 12px;
+            margin-bottom: 6px;
         }
 
         .cup-grid {
             display: grid;
-            grid-template-columns: repeat(8, minmax(0, 1fr));
-            gap: 10px;
+            grid-template-columns: repeat(8, minmax(18px, 32px));
+            gap: 7px;
+            justify-content: center;
         }
 
         .water-cup {
-            height: 48px;
+            height: 34px;
             border: 2px solid #9ccbe8;
             border-top: 0;
             border-radius: 4px 4px 8px 8px;
@@ -291,35 +299,35 @@
 
         .water-note {
             color: #607486;
-            font-size: 1rem;
-            line-height: 1.45;
-            margin-top: 10px;
+            font-size: 0.88rem;
+            line-height: 1.3;
+            margin-top: 6px;
         }
 
         .water-actions {
-            margin-top: 24px;
+            margin-top: 18px;
             text-align: left;
         }
 
         .water-actions-title,
         .water-records-title {
             color: #39546d;
-            font-size: 1.1rem;
+            font-size: 0.98rem;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
 
         .water-action-buttons {
             display: grid;
             grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 10px;
+            gap: 6px;
         }
 
         .water-action-buttons button {
             margin: 0;
-            padding: 12px 10px;
+            padding: 9px 6px;
             border-radius: 6px;
-            font-size: 1.08rem;
+            font-size: 0.96rem;
             box-shadow: none;
         }
 
@@ -331,14 +339,14 @@
         }
 
         .water-records {
-            margin-top: 22px;
+            margin-top: 18px;
             text-align: left;
         }
 
         .water-record-list {
             display: grid;
-            gap: 10px;
-            max-height: 170px;
+            gap: 6px;
+            max-height: 100px;
             overflow-y: auto;
         }
 
@@ -346,66 +354,66 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             color: #3f5265;
             background: #eef7fc;
             border: 1px solid #d4e9f5;
             border-radius: 6px;
-            font-size: 1.06rem;
-            padding: 11px 12px;
+            font-size: 0.92rem;
+            padding: 7px 9px;
         }
 
         .water-record-empty {
             color: #607486;
             background: #f3f7fb;
             border-radius: 6px;
-            font-size: 1.06rem;
-            line-height: 1.45;
-            padding: 12px;
+            font-size: 0.92rem;
+            line-height: 1.3;
+            padding: 8px;
         }
 
         .water-storage-status {
             color: #607486;
-            font-size: 1rem;
-            line-height: 1.45;
-            margin-top: 10px;
+            font-size: 0.88rem;
+            line-height: 1.3;
+            margin-top: 6px;
         }
 
         .water-value {
-            font-size: 3.5rem;
+            font-size: 2.45rem;
             font-weight: 800;
-            margin: 6px 0;
+            margin: 2px 0;
             color: #1e5799;
             line-height: 1.1;
         }
 
         .water-unit {
-            font-size: 1.42rem;
+            font-size: 1.12rem;
             font-weight: 600;
             color: #555;
-            margin-top: 4px;
+            margin-top: 2px;
         }
 
         .waiting-text {
-            font-size: 1.42rem;
+            font-size: 2.1rem;
             color: #666;
         }
 
         .formula {
             background: rgba(255, 255, 255, 0.15);
-            padding: 18px;
-            border-radius: 10px;
-            font-size: 1.28rem;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: 600;
             text-align: center;
-            margin: 8px 0 20px;
-            line-height: 1.55;
+            margin: 8px 0 18px;
+            line-height: 1.35;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 10px;
+            margin-top: 6px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 8px;
             overflow: hidden;
@@ -414,15 +422,15 @@
         th {
             background: rgba(255, 255, 255, 0.2);
             text-align: left;
-            padding: 13px 14px;
+            padding: 7px 9px;
             font-weight: 600;
-            font-size: 1.07rem;
+            font-size: 0.84rem;
         }
 
         td {
-            padding: 11px 14px;
+            padding: 6px 9px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 1.04rem;
+            font-size: 0.82rem;
         }
 
         tr:last-child td {
@@ -430,11 +438,25 @@
         }
 
         .water-value {
-            font-size: 3.5rem;
+            font-size: 2.45rem;
         }
 
         .waiting-text {
-            font-size: 3.5rem;
+            font-size: 2.45rem;
+        }
+
+        .medical-footer {
+            flex: 0 0 auto;
+            background-color: #f8f8f8;
+            padding: 8px 20px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: #555;
+            line-height: 1.35;
+        }
+
+        .medical-footer p {
+            margin: 0;
         }
 
         @keyframes fadeIn {
@@ -476,7 +498,7 @@
             .content {
                 height: auto;
                 padding: 20px;
-                overflow-y: auto;
+                overflow-y: hidden;
             }
 
             .result-section {
@@ -652,13 +674,7 @@
 
         <div class="auth-section">
             {% if session.get('username') %}
-            <div class="user-info" onclick="toggleLogout()" style="position: relative; cursor: pointer;">
-                <div style="color: #fff;">欢迎，{{ session['username'] }}</div>
-                <a id="logout-button" href="/logout"
-                   style="display: none; position: absolute; top: 100%; right: 0; background: #fff; color: #333; padding: 5px 10px; border-radius: 4px; margin-top: 4px; font-size: 0.9rem; white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,0.15);">
-                    退出
-                </a>
-            </div>
+            <a class="user-info" href="/profile" style="color: #fff; text-decoration: none; border: none; padding: 0; font-weight: 500; position: relative; display: inline-block; cursor: pointer;">欢迎，{{ session['username'] }}</a>
             {% else %}
             <div style="display: flex; gap: 10px;">
                 <a href="/login">登录</a>
@@ -1149,7 +1165,7 @@
     });
 </script>
 <!-- ✅ 医学声明页脚 -->
-<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+<footer class="medical-footer">
     <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。
     </p>
 </footer>

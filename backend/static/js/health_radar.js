@@ -141,6 +141,13 @@
     }
 
     function createRadarCard(userInfo) {
+        if (!userInfo.style.position) {
+            userInfo.style.position = 'relative';
+        }
+        if (!userInfo.style.display) {
+            userInfo.style.display = 'inline-block';
+        }
+
         let card = userInfo.querySelector('.health-radar-card');
         if (card) {
             return card;
@@ -155,6 +162,10 @@
             <div class="health-radar-chart" id="health-radar-chart" style="display:none;"></div>
             <div class="health-radar-details" id="health-radar-details"></div>
         `;
+        card.addEventListener('click', event => {
+            event.preventDefault();
+            event.stopPropagation();
+        });
         userInfo.appendChild(card);
         return card;
     }

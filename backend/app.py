@@ -5,7 +5,7 @@ import os
 import sys
 import json
 from collections import Counter
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from urllib.parse import urlparse
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
@@ -15,6 +15,11 @@ import joblib
 from torchvision import transforms, models
 import torch.nn as nn
 
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    ZoneInfo = None
+
 
 app = Flask(__name__)
 DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
@@ -23,9 +28,18 @@ DB_USER = os.getenv('DB_USER', 'healthapp')
 DB_PASSWORD = os.getenv('DB_PASSWORD', '')
 DB_NAME = os.getenv('DB_NAME', 'health')
 DB_UNIX_SOCKET = os.getenv('DB_UNIX_SOCKET')
+DB_TIME_ZONE = os.getenv('DB_TIME_ZONE', '+08:00')
 APP_HOST = os.getenv('APP_HOST', '0.0.0.0')
 APP_PORT = int(os.getenv('PORT', os.getenv('APP_PORT', '5000')))
 APP_DEBUG = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+APP_TIMEZONE_NAME = os.getenv('APP_TIMEZONE', 'Asia/Shanghai')
+if ZoneInfo:
+    try:
+        APP_TIMEZONE = ZoneInfo(APP_TIMEZONE_NAME)
+    except Exception:
+        APP_TIMEZONE = timezone(timedelta(hours=8))
+else:
+    APP_TIMEZONE = timezone(timedelta(hours=8))
 
 UPLOAD_FOLDER = 'static\\uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
@@ -82,7 +96,19 @@ def get_db_connection():
         connection_kwargs['host'] = DB_HOST
         connection_kwargs['port'] = DB_PORT
 
-    return pymysql.connect(**connection_kwargs)
+    connection = pymysql.connect(**connection_kwargs)
+    if DB_TIME_ZONE:
+        with connection.cursor() as cursor:
+            cursor.execute("SET time_zone = %s", (DB_TIME_ZONE,))
+    return connection
+
+
+def get_app_now():
+    return datetime.now(APP_TIMEZONE).replace(tzinfo=None)
+
+
+def get_app_today():
+    return get_app_now().date()
 
 
 def build_static_url(relative_path):
@@ -802,7 +828,7 @@ def inject_user_status():
 def get_latest_bmi_record(cursor, user_id):
     cursor.execute(
         """
-        SELECT bmi, category, created_at
+        SELECT height_cm, weight_kg, bmi, category, created_at
         FROM bmi_records
         WHERE user_id = %s
         ORDER BY created_at DESC, id DESC
@@ -887,6 +913,12 @@ def build_disease_risk_metric(label, tested, healthy, confidence, no_test_detail
     )
 
 
+def build_profile_history_risk_metric(profile_info, history_key, label, fallback_metric):
+    if profile_info and profile_info.get(history_key) == 1:
+        return build_health_radar_metric(label, 10, f"个人中心已记录{label.replace('风险', '史')}")
+    return fallback_metric
+
+
 @app.route('/api/health-risk-radar')
 def api_health_risk_radar():
     user_id = session.get('user_id')
@@ -910,6 +942,20 @@ def api_health_risk_radar():
 
             bmi_record = get_latest_bmi_record(cursor, user_id) if get_table_exists(cursor, "bmi_records") else None
             sleep_record = get_latest_sleep_record(cursor, user_id) if get_table_exists(cursor, "sleep_quality_records") else None
+            profile_info = None
+            ensure_user_profile_info_schema(cursor)
+            cursor.execute(
+                """
+                SELECT height_cm, weight_kg, sleep_hours,
+                       has_chest_disease_history, has_heart_disease_history,
+                       has_diabetes_history, updated_at
+                FROM user_profile_info
+                WHERE user_id = %s
+                """,
+                (user_id,),
+            )
+            profile_info = format_user_profile_info(cursor.fetchone())
+
             water_state = None
             if get_table_exists(cursor, "water_daily_targets") and get_table_exists(cursor, "water_intake_records"):
                 water_state = get_today_water_state_for_radar(cursor, user_id)
@@ -929,16 +975,43 @@ def api_health_risk_radar():
             weight_score = 38
         weight_detail = f"最近 BMI {bmi_value:.1f}，{bmi_category}"
     else:
-        weight_score = 60
-        weight_detail = "暂无 BMI 记录"
+        profile_height = profile_info.get("height_cm") if profile_info else None
+        profile_weight = profile_info.get("weight_kg") if profile_info else None
+        if profile_height and profile_weight:
+            profile_bmi_value = profile_weight / ((profile_height / 100) ** 2)
+            profile_bmi_category = get_bmi_category(profile_bmi_value)
+            if 18.5 <= profile_bmi_value < 25:
+                weight_score = 100
+            elif profile_bmi_value < 18.5:
+                weight_score = 68
+            elif profile_bmi_value < 30:
+                weight_score = 58
+            else:
+                weight_score = 38
+            weight_detail = f"个人信息 BMI {profile_bmi_value:.1f}，{profile_bmi_category}"
+        else:
+            weight_score = 60
+            weight_detail = "暂无 BMI 记录"
 
     if sleep_record:
         sleep_score_raw = int(sleep_record.get("score") or 0)
         sleep_score = sleep_score_raw / 18 * 100
         sleep_detail = f"最近睡眠评分 {sleep_score_raw}/18，{sleep_record.get('category') or '未知'}"
     else:
-        sleep_score = 60
-        sleep_detail = "暂无睡眠评估记录"
+        profile_sleep_hours = profile_info.get("sleep_hours") if profile_info else None
+        if profile_sleep_hours is not None:
+            if 7 <= profile_sleep_hours <= 9:
+                sleep_score = 95
+            elif 6 <= profile_sleep_hours < 7 or 9 < profile_sleep_hours <= 10:
+                sleep_score = 75
+            elif 5 <= profile_sleep_hours < 6 or 10 < profile_sleep_hours <= 11:
+                sleep_score = 55
+            else:
+                sleep_score = 40
+            sleep_detail = f"个人信息睡眠 {profile_sleep_hours:.1f} 小时"
+        else:
+            sleep_score = 60
+            sleep_detail = "暂无睡眠评估记录"
 
     if water_state and water_state["target_ml"]:
         progress = water_state["current_ml"] / water_state["target_ml"] * 100
@@ -968,36 +1041,55 @@ def api_health_risk_radar():
     diabetes_confidence = user_row.get("diabetes_confidence")
     heart_confidence = user_row.get("heart_confidence")
 
+    chest_metric = build_disease_risk_metric(
+        "胸部疾病风险",
+        chest_tested,
+        chest_healthy,
+        chest_confidence,
+        "胸部疾病暂无测试结果",
+        "胸部疾病测试未发现风险",
+        f"胸部检测异常：{chest_result or '未知'}",
+    )
+    diabetes_metric = build_disease_risk_metric(
+        "糖尿病风险",
+        diabetes_tested,
+        diabetes_healthy,
+        diabetes_confidence,
+        "糖尿病暂无测试结果",
+        "糖尿病测试未发现风险",
+        "糖尿病检测异常",
+    )
+    heart_metric = build_disease_risk_metric(
+        "心脏疾病风险",
+        heart_tested,
+        heart_healthy,
+        heart_confidence,
+        "心脏疾病暂无测试结果",
+        "心脏疾病测试未发现风险",
+        "心脏疾病诊断异常",
+    )
+
     metrics = [
         build_health_radar_metric("体重管理", weight_score, weight_detail),
         build_health_radar_metric("睡眠质量", sleep_score, sleep_detail),
         build_health_radar_metric("饮水习惯", water_score, water_detail),
-        build_disease_risk_metric(
+        build_profile_history_risk_metric(
+            profile_info,
+            "has_chest_disease_history",
             "胸部疾病风险",
-            chest_tested,
-            chest_healthy,
-            chest_confidence,
-            "胸部疾病暂无测试结果",
-            "胸部疾病测试未发现风险",
-            f"胸部检测异常：{chest_result or '未知'}",
+            chest_metric,
         ),
-        build_disease_risk_metric(
+        build_profile_history_risk_metric(
+            profile_info,
+            "has_diabetes_history",
             "糖尿病风险",
-            diabetes_tested,
-            diabetes_healthy,
-            diabetes_confidence,
-            "糖尿病暂无测试结果",
-            "糖尿病测试未发现风险",
-            "糖尿病检测异常",
+            diabetes_metric,
         ),
-        build_disease_risk_metric(
+        build_profile_history_risk_metric(
+            profile_info,
+            "has_heart_disease_history",
             "心脏疾病风险",
-            heart_tested,
-            heart_healthy,
-            heart_confidence,
-            "心脏疾病暂无测试结果",
-            "心脏疾病测试未发现风险",
-            "心脏疾病诊断异常",
+            heart_metric,
         ),
     ]
 
@@ -1063,6 +1155,617 @@ def knowledge():
 @app.route('/application')
 def application():
     return render_template('application.html', active_page='application')
+
+
+@app.route('/profile')
+def profile():
+    if not session.get('user_id'):
+        return redirect(url_for('login'))
+
+    return render_template('profile.html', active_page='profile')
+
+
+def ensure_user_profile_info_schema(cursor):
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_profile_info (
+            user_id INT NOT NULL PRIMARY KEY,
+            height_cm DECIMAL(6,2) NULL,
+            weight_kg DECIMAL(6,2) NULL,
+            sleep_hours DECIMAL(4,2) NULL,
+            has_chest_disease_history TINYINT NULL DEFAULT NULL,
+            has_heart_disease_history TINYINT NULL DEFAULT NULL,
+            has_diabetes_history TINYINT NULL DEFAULT NULL,
+            updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        """
+    )
+    profile_history_columns = {
+        "has_chest_disease_history": "TINYINT NULL DEFAULT NULL",
+        "has_heart_disease_history": "TINYINT NULL DEFAULT NULL",
+        "has_diabetes_history": "TINYINT NULL DEFAULT NULL",
+    }
+    for column_name, column_definition in profile_history_columns.items():
+        cursor.execute("SHOW COLUMNS FROM user_profile_info LIKE %s", (column_name,))
+        if not cursor.fetchone():
+            cursor.execute(f"ALTER TABLE user_profile_info ADD COLUMN {column_name} {column_definition}")
+
+
+def parse_optional_float(payload, key, label, min_value, max_value):
+    value = payload.get(key)
+    if value in (None, ""):
+        return None
+
+    try:
+        parsed_value = float(value)
+    except (TypeError, ValueError):
+        raise ValueError(f"{label}必须为有效数字。")
+
+    if not min_value <= parsed_value <= max_value:
+        raise ValueError(f"{label}请输入合理范围内的数值。")
+
+    return parsed_value
+
+
+def parse_optional_int(payload, key, label, min_value, max_value):
+    value = parse_optional_float(payload, key, label, min_value, max_value)
+    return None if value is None else int(round(value))
+
+
+def parse_optional_bool(payload, key, label):
+    value = payload.get(key)
+    if value in (None, ""):
+        return None
+    if value in (True, "1", 1, "true", "True", "yes", "有"):
+        return 1
+    if value in (False, "0", 0, "false", "False", "no", "否"):
+        return 0
+    raise ValueError(f"{label}选项无效。")
+
+
+def format_user_profile_info(row):
+    if not row:
+        return {
+            "height_cm": None,
+            "weight_kg": None,
+            "sleep_hours": None,
+            "has_chest_disease_history": None,
+            "has_heart_disease_history": None,
+            "has_diabetes_history": None,
+            "updated_at": None,
+        }
+
+    updated_at = row.get("updated_at")
+    if hasattr(updated_at, "strftime"):
+        updated_at = updated_at.strftime("%Y-%m-%d %H:%M")
+
+    return {
+        "height_cm": float(row["height_cm"]) if row.get("height_cm") is not None else None,
+        "weight_kg": float(row["weight_kg"]) if row.get("weight_kg") is not None else None,
+        "sleep_hours": float(row["sleep_hours"]) if row.get("sleep_hours") is not None else None,
+        "has_chest_disease_history": int(row["has_chest_disease_history"]) if row.get("has_chest_disease_history") is not None else None,
+        "has_heart_disease_history": int(row["has_heart_disease_history"]) if row.get("has_heart_disease_history") is not None else None,
+        "has_diabetes_history": int(row["has_diabetes_history"]) if row.get("has_diabetes_history") is not None else None,
+        "updated_at": updated_at,
+    }
+
+
+def format_profile_time(value):
+    if hasattr(value, "strftime"):
+        return value.strftime("%Y-%m-%d %H:%M")
+    return str(value or "") or None
+
+
+def apply_profile_updated_at(profile_info, recorded_at):
+    if recorded_at and (not profile_info.get("updated_at") or recorded_at > profile_info["updated_at"]):
+        profile_info["updated_at"] = recorded_at
+
+
+def optional_number_changed(new_value, old_value):
+    if new_value is None:
+        return False
+    if old_value is None:
+        return True
+    return abs(float(new_value) - float(old_value)) >= 0.01
+
+
+def sync_profile_bmi_record(cursor, user_id, height_cm, weight_kg):
+    if height_cm is None or weight_kg is None:
+        return None
+
+    ensure_bmi_records_schema(cursor)
+    latest_bmi = get_latest_bmi_record(cursor, user_id)
+    if latest_bmi:
+        latest_height = float(latest_bmi.get("height_cm") or 0)
+        latest_weight = float(latest_bmi.get("weight_kg") or 0)
+        if abs(latest_height - height_cm) < 0.01 and abs(latest_weight - weight_kg) < 0.01:
+            return latest_bmi
+
+    height_m = height_cm / 100
+    bmi_value = round(weight_kg / (height_m * height_m), 2)
+    category = get_bmi_category(bmi_value)
+    cursor.execute(
+        """
+        INSERT INTO bmi_records (user_id, height_cm, weight_kg, bmi, category)
+        VALUES (%s, %s, %s, %s, %s)
+        """,
+        (user_id, height_cm, weight_kg, bmi_value, category),
+    )
+    return {
+        "height_cm": height_cm,
+        "weight_kg": weight_kg,
+        "bmi": bmi_value,
+        "category": category,
+        "created_at": None,
+    }
+
+
+def sync_profile_sleep_record(cursor, user_id, sleep_hours):
+    if sleep_hours is None:
+        return None
+
+    ensure_sleep_records_schema(cursor)
+    app_now = get_app_now()
+    app_today = app_now.date()
+    today_start = datetime.combine(app_today, datetime.min.time())
+    tomorrow_start = today_start + timedelta(days=1)
+    sleep_latency = 30
+    awakenings = 1
+    morning_feeling = 2
+    daytime_function = 2
+    satisfaction = 2
+    score = calculate_sleep_score(
+        sleep_hours,
+        sleep_latency,
+        awakenings,
+        morning_feeling,
+        daytime_function,
+        satisfaction,
+    )
+    category = get_sleep_category(score)
+
+    cursor.execute(
+        """
+        SELECT id, sleep_duration
+        FROM sleep_quality_records
+        WHERE user_id = %s
+          AND created_at >= %s
+          AND created_at < %s
+        ORDER BY created_at DESC, id DESC
+        LIMIT 1
+        """,
+        (user_id, today_start, tomorrow_start),
+    )
+    today_sleep = cursor.fetchone()
+    if today_sleep:
+        if abs(float(today_sleep.get("sleep_duration") or 0) - sleep_hours) < 0.01:
+            return today_sleep
+
+        cursor.execute(
+            """
+            UPDATE sleep_quality_records
+            SET sleep_duration = %s,
+                sleep_latency = %s,
+                awakenings = %s,
+                morning_feeling = %s,
+                daytime_function = %s,
+                satisfaction = %s,
+                score = %s,
+                category = %s,
+                created_at = %s
+            WHERE id = %s AND user_id = %s
+            """,
+            (
+                sleep_hours,
+                sleep_latency,
+                awakenings,
+                morning_feeling,
+                daytime_function,
+                satisfaction,
+                score,
+                category,
+                app_now,
+                today_sleep["id"],
+                user_id,
+            ),
+        )
+        return {
+            "sleep_duration": sleep_hours,
+            "score": score,
+            "category": category,
+            "created_at": app_now,
+        }
+
+    cursor.execute(
+        """
+        INSERT INTO sleep_quality_records
+            (user_id, sleep_duration, sleep_latency, awakenings, morning_feeling,
+             daytime_function, satisfaction, score, category, created_at)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """,
+        (
+            user_id,
+            sleep_hours,
+            sleep_latency,
+            awakenings,
+            morning_feeling,
+            daytime_function,
+            satisfaction,
+            score,
+            category,
+            app_now,
+        ),
+    )
+    return {
+        "sleep_duration": sleep_hours,
+        "score": score,
+        "category": category,
+        "created_at": app_now,
+    }
+
+
+def apply_app_records_to_profile_info(cursor, user_id, profile_info):
+    if get_table_exists(cursor, "bmi_records"):
+        bmi_record = get_latest_bmi_record(cursor, user_id)
+        if bmi_record:
+            profile_info["height_cm"] = float(bmi_record.get("height_cm") or 0)
+            profile_info["weight_kg"] = float(bmi_record.get("weight_kg") or 0)
+            profile_info["bmi"] = float(bmi_record.get("bmi") or 0)
+            profile_info["bmi_category"] = bmi_record.get("category") or ""
+            profile_info["bmi_recorded_at"] = format_profile_time(bmi_record.get("created_at"))
+            apply_profile_updated_at(profile_info, profile_info["bmi_recorded_at"])
+
+    if get_table_exists(cursor, "sleep_quality_records"):
+        sleep_record = get_latest_sleep_record(cursor, user_id)
+        if sleep_record:
+            profile_info["sleep_hours"] = float(sleep_record.get("sleep_duration") or 0)
+            profile_info["sleep_category"] = sleep_record.get("category") or ""
+            profile_info["sleep_recorded_at"] = format_profile_time(sleep_record.get("created_at"))
+            apply_profile_updated_at(profile_info, profile_info["sleep_recorded_at"])
+
+    return profile_info
+
+
+def ensure_user_vital_sign_records_schema(cursor):
+    cursor.execute(
+        """
+        CREATE TABLE IF NOT EXISTS user_vital_sign_records (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            heart_rate_bpm SMALLINT UNSIGNED NULL,
+            systolic_pressure SMALLINT UNSIGNED NULL,
+            diastolic_pressure SMALLINT UNSIGNED NULL,
+            recorded_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+            INDEX idx_user_vital_sign_records_user_time (user_id, recorded_at, id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+        """
+    )
+
+
+def format_vital_sign_record(row):
+    if not row:
+        return {
+            "heart_rate_bpm": None,
+            "systolic_pressure": None,
+            "diastolic_pressure": None,
+            "vital_recorded_at": None,
+        }
+
+    recorded_at = row.get("recorded_at")
+    if hasattr(recorded_at, "strftime"):
+        recorded_at = recorded_at.strftime("%Y-%m-%d %H:%M")
+
+    return {
+        "heart_rate_bpm": row.get("heart_rate_bpm"),
+        "systolic_pressure": row.get("systolic_pressure"),
+        "diastolic_pressure": row.get("diastolic_pressure"),
+        "vital_recorded_at": recorded_at,
+    }
+
+
+def fetch_latest_vital_sign_record(cursor, user_id):
+    vital_info = format_vital_sign_record(None)
+
+    cursor.execute(
+        """
+        SELECT heart_rate_bpm, recorded_at
+        FROM user_vital_sign_records
+        WHERE user_id = %s AND heart_rate_bpm IS NOT NULL
+        ORDER BY recorded_at DESC, id DESC
+        LIMIT 1
+        """,
+        (user_id,),
+    )
+    heart_record = cursor.fetchone()
+    if heart_record:
+        vital_info["heart_rate_bpm"] = heart_record.get("heart_rate_bpm")
+        vital_info["heart_recorded_at"] = format_profile_time(heart_record.get("recorded_at"))
+        apply_profile_updated_at(vital_info, vital_info["heart_recorded_at"])
+
+    cursor.execute(
+        """
+        SELECT systolic_pressure, diastolic_pressure, recorded_at
+        FROM user_vital_sign_records
+        WHERE user_id = %s
+          AND systolic_pressure IS NOT NULL
+          AND diastolic_pressure IS NOT NULL
+        ORDER BY recorded_at DESC, id DESC
+        LIMIT 1
+        """,
+        (user_id,),
+    )
+    blood_pressure_record = cursor.fetchone()
+    if blood_pressure_record:
+        vital_info["systolic_pressure"] = blood_pressure_record.get("systolic_pressure")
+        vital_info["diastolic_pressure"] = blood_pressure_record.get("diastolic_pressure")
+        vital_info["blood_pressure_recorded_at"] = format_profile_time(blood_pressure_record.get("recorded_at"))
+        apply_profile_updated_at(vital_info, vital_info["blood_pressure_recorded_at"])
+
+    vital_info["vital_recorded_at"] = vital_info.get("updated_at")
+    return vital_info
+
+
+def sync_profile_vital_sign_record(cursor, user_id, vital_values):
+    latest_vitals = fetch_latest_vital_sign_record(cursor, user_id)
+
+    heart_changed = optional_number_changed(
+        vital_values["heart_rate_bpm"],
+        latest_vitals.get("heart_rate_bpm"),
+    )
+    blood_pressure_changed = (
+        vital_values["systolic_pressure"] is not None
+        and vital_values["diastolic_pressure"] is not None
+        and (
+            optional_number_changed(vital_values["systolic_pressure"], latest_vitals.get("systolic_pressure"))
+            or optional_number_changed(vital_values["diastolic_pressure"], latest_vitals.get("diastolic_pressure"))
+        )
+    )
+    if not (heart_changed or blood_pressure_changed):
+        return
+
+    cursor.execute(
+        """
+        INSERT INTO user_vital_sign_records (
+            user_id, heart_rate_bpm, systolic_pressure,
+            diastolic_pressure
+        )
+        VALUES (%s, %s, %s, %s)
+        """,
+        (
+            user_id,
+            vital_values["heart_rate_bpm"] if heart_changed else None,
+            vital_values["systolic_pressure"] if blood_pressure_changed else None,
+            vital_values["diastolic_pressure"] if blood_pressure_changed else None,
+        ),
+    )
+
+
+def format_vital_sign_history_record(row):
+    recorded_at = row.get("recorded_at")
+    if hasattr(recorded_at, "strftime"):
+        recorded_value = recorded_at.strftime("%Y-%m-%d %H:%M:%S")
+        recorded_label = recorded_at.strftime("%m-%d %H:%M")
+    else:
+        recorded_value = str(recorded_at or "")
+        recorded_label = recorded_value[5:16] if len(recorded_value) >= 16 else recorded_value
+
+    return {
+        "id": row.get("id"),
+        "heart_rate_bpm": row.get("heart_rate_bpm"),
+        "systolic_pressure": row.get("systolic_pressure"),
+        "diastolic_pressure": row.get("diastolic_pressure"),
+        "recorded_at": recorded_value,
+        "label": recorded_label,
+    }
+
+
+@app.route('/api/vital-sign-records')
+def api_vital_sign_records():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({
+            "authenticated": False,
+            "records": [],
+            "message": "登录后可查看心率和血压趋势。",
+        }), 401
+
+    limit = request.args.get("limit", 20)
+    try:
+        limit = max(1, min(int(limit), 50))
+    except (TypeError, ValueError):
+        limit = 20
+    query_limit = limit * 3
+
+    db = get_db_connection()
+    try:
+        with db.cursor() as cursor:
+            ensure_user_vital_sign_records_schema(cursor)
+            cursor.execute(
+                """
+                SELECT id, heart_rate_bpm, systolic_pressure, diastolic_pressure,
+                       recorded_at
+                FROM user_vital_sign_records
+                WHERE user_id = %s
+                  AND (
+                      heart_rate_bpm IS NOT NULL
+                      OR systolic_pressure IS NOT NULL
+                      OR diastolic_pressure IS NOT NULL
+                  )
+                ORDER BY recorded_at DESC, id DESC
+                LIMIT %s
+                """,
+                (user_id, query_limit),
+            )
+            records = [format_vital_sign_history_record(row) for row in reversed(cursor.fetchall())]
+    finally:
+        db.close()
+
+    return jsonify({"authenticated": True, "records": records})
+
+
+@app.route('/api/sleep-calendar')
+def api_sleep_calendar():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({
+            "authenticated": False,
+            "days": [],
+            "message": "登录后可查看睡眠时长热力图。",
+        }), 401
+
+    today = get_app_today()
+    month_text = request.args.get("month") or today.strftime("%Y-%m")
+    try:
+        month_start = datetime.strptime(month_text, "%Y-%m").date().replace(day=1)
+    except ValueError:
+        return jsonify({"error": "月份格式应为 YYYY-MM。"}), 400
+
+    if month_start.month == 12:
+        next_month_start = month_start.replace(year=month_start.year + 1, month=1)
+    else:
+        next_month_start = month_start.replace(month=month_start.month + 1)
+    month_end = next_month_start - timedelta(days=1)
+    month_start_at = datetime.combine(month_start, datetime.min.time())
+    next_month_start_at = datetime.combine(next_month_start, datetime.min.time())
+
+    sleep_by_date = {}
+    db = get_db_connection()
+    try:
+        with db.cursor() as cursor:
+            ensure_sleep_records_schema(cursor)
+            cursor.execute(
+                """
+                SELECT DATE(created_at) AS sleep_date, AVG(sleep_duration) AS sleep_hours
+                FROM sleep_quality_records
+                WHERE user_id = %s
+                  AND created_at >= %s
+                  AND created_at < %s
+                GROUP BY DATE(created_at)
+                """,
+                (user_id, month_start_at, next_month_start_at),
+            )
+            for row in cursor.fetchall():
+                sleep_date = row.get("sleep_date")
+                if hasattr(sleep_date, "strftime"):
+                    sleep_date = sleep_date.strftime("%Y-%m-%d")
+                if sleep_date:
+                    sleep_by_date[sleep_date] = round(float(row.get("sleep_hours") or 0), 1)
+
+    finally:
+        db.close()
+
+    days = []
+    current = month_start
+    while current <= month_end:
+        current_key = current.strftime("%Y-%m-%d")
+        days.append({
+            "date": current_key,
+            "sleep_hours": sleep_by_date.get(current_key),
+        })
+        current += timedelta(days=1)
+
+    return jsonify({
+        "authenticated": True,
+        "month": month_start.strftime("%Y-%m"),
+        "current_month": today.strftime("%Y-%m"),
+        "today": today.strftime("%Y-%m-%d"),
+        "range": [month_start.strftime("%Y-%m-%d"), month_end.strftime("%Y-%m-%d")],
+        "days": days,
+    })
+
+
+@app.route('/api/profile-info', methods=['GET', 'POST'])
+def api_profile_info():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({"authenticated": False, "message": "登录后可保存个人信息。"}), 401
+
+    db = get_db_connection()
+    try:
+        with db.cursor() as cursor:
+            ensure_user_profile_info_schema(cursor)
+            ensure_user_vital_sign_records_schema(cursor)
+
+            if request.method == 'POST':
+                payload = request.get_json(silent=True) or {}
+                try:
+                    values = {
+                        "height_cm": parse_optional_float(payload, "height_cm", "个人身高", 50, 250),
+                        "weight_kg": parse_optional_float(payload, "weight_kg", "体重", 10, 300),
+                        "sleep_hours": parse_optional_float(payload, "sleep_hours", "睡眠时长", 0, 24),
+                        "has_chest_disease_history": parse_optional_bool(payload, "has_chest_disease_history", "胸部疾病史"),
+                        "has_heart_disease_history": parse_optional_bool(payload, "has_heart_disease_history", "心脏病史"),
+                        "has_diabetes_history": parse_optional_bool(payload, "has_diabetes_history", "糖尿病史"),
+                    }
+                    vital_values = {
+                        "heart_rate_bpm": parse_optional_int(payload, "heart_rate_bpm", "心率", 30, 220),
+                        "systolic_pressure": parse_optional_int(payload, "systolic_pressure", "收缩压", 60, 260),
+                        "diastolic_pressure": parse_optional_int(payload, "diastolic_pressure", "舒张压", 30, 160),
+                    }
+                except ValueError as error:
+                    return jsonify({"error": str(error)}), 400
+
+                cursor.execute(
+                    """
+                    INSERT INTO user_profile_info (
+                        user_id, height_cm, weight_kg, sleep_hours,
+                        has_chest_disease_history, has_heart_disease_history,
+                        has_diabetes_history
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    ON DUPLICATE KEY UPDATE
+                        height_cm = VALUES(height_cm),
+                        weight_kg = VALUES(weight_kg),
+                        sleep_hours = VALUES(sleep_hours),
+                        has_chest_disease_history = VALUES(has_chest_disease_history),
+                        has_heart_disease_history = VALUES(has_heart_disease_history),
+                        has_diabetes_history = VALUES(has_diabetes_history),
+                        updated_at = CURRENT_TIMESTAMP
+                    """,
+                    (
+                        user_id,
+                        values["height_cm"],
+                        values["weight_kg"],
+                        values["sleep_hours"],
+                        values["has_chest_disease_history"],
+                        values["has_heart_disease_history"],
+                        values["has_diabetes_history"],
+                    ),
+                )
+                sync_profile_vital_sign_record(cursor, user_id, vital_values)
+                sync_profile_bmi_record(
+                    cursor,
+                    user_id,
+                    values["height_cm"],
+                    values["weight_kg"],
+                )
+                sync_profile_sleep_record(cursor, user_id, values["sleep_hours"])
+                db.commit()
+
+            cursor.execute(
+                """
+                SELECT height_cm, weight_kg, sleep_hours,
+                       has_chest_disease_history, has_heart_disease_history,
+                       has_diabetes_history, updated_at
+                FROM user_profile_info
+                WHERE user_id = %s
+                """,
+                (user_id,),
+            )
+            profile_info = format_user_profile_info(cursor.fetchone())
+            profile_info = apply_app_records_to_profile_info(cursor, user_id, profile_info)
+            vital_info = fetch_latest_vital_sign_record(cursor, user_id)
+            vital_updated_at = vital_info.pop("updated_at", None)
+            profile_info.update(vital_info)
+            apply_profile_updated_at(profile_info, vital_updated_at)
+    except Exception:
+        db.rollback()
+        raise
+    finally:
+        db.close()
+
+    return jsonify({"authenticated": True, "profile": profile_info})
 
 
 @app.route('/disease-map')
@@ -1659,12 +2362,13 @@ def api_sleep_records():
                     satisfaction,
                 )
                 category = get_sleep_category(score)
+                app_now = get_app_now()
                 cursor.execute(
                     """
                     INSERT INTO sleep_quality_records
                         (user_id, sleep_duration, sleep_latency, awakenings, morning_feeling,
-                         daytime_function, satisfaction, score, category)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                         daytime_function, satisfaction, score, category, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                         user_id,
@@ -1676,6 +2380,7 @@ def api_sleep_records():
                         satisfaction,
                         score,
                         category,
+                        app_now,
                     ),
                 )
                 db.commit()
