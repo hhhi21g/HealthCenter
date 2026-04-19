@@ -15,6 +15,25 @@ import joblib
 from torchvision import transforms, models
 import torch.nn as nn
 
+
+def load_env_file(env_path):
+    if not os.path.exists(env_path):
+        return
+
+    with open(env_path, 'r', encoding='utf-8') as file:
+        for line in file:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, value = line.split('=', 1)
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key:
+                os.environ.setdefault(key, value)
+
+
+load_env_file(os.path.join(os.path.dirname(__file__), '.env'))
+
 try:
     from zoneinfo import ZoneInfo
 except ImportError:

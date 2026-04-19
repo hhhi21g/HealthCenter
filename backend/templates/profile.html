@@ -731,15 +731,42 @@
             setTimeout(() => profileRadarChart && profileRadarChart.resize(), 30);
         }
 
-        function buildLineOption(title, labels, series, yAxisName) {
+        function buildLineOption(title, labels, series, yAxisName, referenceLines = []) {
+            const referenceValues = referenceLines.map(line => line.yAxis);
+            const normalizedReferenceLines = referenceLines.map(line => ({
+                name: line.name || '',
+                yAxis: line.yAxis,
+                label: line.showLabel === false ? {
+                    show: false
+                } : {
+                    color: line.color || '#2f9e44',
+                    formatter: line.name || ''
+                },
+                lineStyle: {
+                    color: line.color || '#2f9e44',
+                    type: 'dashed',
+                    width: 1.5
+                }
+            }));
+
             return {
                 tooltip: {
                     trigger: 'axis'
                 },
+                legend: series.length > 1 ? {
+                    top: 0,
+                    right: 12,
+                    textStyle: {
+                        color: '#40556a',
+                        fontSize: 11
+                    },
+                    itemWidth: 18,
+                    itemHeight: 8
+                } : undefined,
                 grid: {
                     left: 44,
                     right: 18,
-                    top: 28,
+                    top: series.length > 1 ? 44 : 28,
                     bottom: 36
                 },
                 xAxis: {
@@ -758,6 +785,12 @@
                 yAxis: {
                     type: 'value',
                     name: yAxisName,
+                    min: referenceValues.length
+                        ? value => Math.floor(Math.min(value.min, ...referenceValues) * 0.95)
+                        : undefined,
+                    max: referenceValues.length
+                        ? value => Math.ceil(Math.max(value.max, ...referenceValues) * 1.05)
+                        : undefined,
                     nameTextStyle: {
                         color: '#607486'
                     },
@@ -770,7 +803,7 @@
                         }
                     }
                 },
-                series: series.map(item => ({
+                series: series.map((item, index) => ({
                     ...item,
                     type: 'line',
                     smooth: true,
@@ -780,6 +813,15 @@
                         width: 2.5,
                         color: item.color
                     },
+                    markLine: index === 0 && referenceLines.length ? {
+                        symbol: 'none',
+                        silent: true,
+                        lineStyle: {
+                            type: 'dashed',
+                            width: 1.5
+                        },
+                        data: normalizedReferenceLines
+                    } : undefined,
                     itemStyle: {
                         color: item.color
                     },
@@ -815,7 +857,8 @@
                     color: config.color,
                     area: config.area
                 }],
-                config.yAxisName
+                config.yAxisName,
+                config.referenceLines
             ));
             setTimeout(() => config.chartRef.current && config.chartRef.current.resize(), 30);
         }
@@ -844,17 +887,21 @@
                 points.map(record => record.label),
                 [
                     {
-                        name: '收缩压',
-                        data: points.map(record => record.systolic_pressure),
+                        name: '舒张压（蓝线）',
+                        data: points.map(record => record.diastolic_pressure),
                         color: '#1e5799'
                     },
                     {
-                        name: '舒张压',
-                        data: points.map(record => record.diastolic_pressure),
+                        name: '收缩压（绿线）',
+                        data: points.map(record => record.systolic_pressure),
                         color: '#40c057'
                     }
                 ],
-                'mmHg'
+                'mmHg',
+                [
+                    { yAxis: 120, color: '#40c057', showLabel: false },
+                    { yAxis: 80, color: '#1e5799', showLabel: false }
+                ]
             ));
             setTimeout(() => bloodPressureChart && bloodPressureChart.resize(), 30);
         }
@@ -869,6 +916,10 @@
                 yAxisName: '次/分钟',
                 color: '#e03131',
                 area: 'rgba(224, 49, 49, 0.12)',
+                referenceLines: [
+                    { yAxis: 60, color: '#e03131', showLabel: false },
+                    { yAxis: 100, color: '#e03131', showLabel: false }
+                ],
                 emptyMessage: '保存心率后显示趋势图。',
                 chartRef: {
                     get current() {

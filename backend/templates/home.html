@@ -599,7 +599,7 @@
     let dashboardSourceChart = null;
     let dashboardTrendData = null;
     let dashboardTrendType = 'line';
-    let dashboardLatestItems = { all: [] };
+    let dashboardLatestItems = {all: []};
     let dashboardLatestType = 'all';
 
     function showDashboardEmpty(id, visible) {
@@ -656,7 +656,7 @@
 
         dashboardTrendChart.setOption({
             color: trend.series.map(series => dashboardColors[series.key] || '#007acc'),
-            tooltip: { trigger: 'axis' },
+            tooltip: {trigger: 'axis'},
             legend: {
                 top: 0,
                 data: trend.series.map(series => series.label)
@@ -685,7 +685,7 @@
                 smooth: false,
                 symbolSize: 6,
                 data: series.data,
-                areaStyle: dashboardTrendType === 'line' ? { opacity: 0.08 } : undefined,
+                areaStyle: dashboardTrendType === 'line' ? {opacity: 0.08} : undefined,
                 barMaxWidth: dashboardTrendType === 'bar' ? 18 : undefined
             }))
         }, true);
@@ -850,12 +850,12 @@
                 renderDashboardSummary(data.summary || []);
                 renderDashboardUpdatedAt(data.updated_at);
 
-                dashboardTrendData = data.trend || { dates: [], series: [] };
+                dashboardTrendData = data.trend || {dates: [], series: []};
                 renderTrendChart(dashboardTrendData);
                 renderDistributionChart(data.distribution || []);
                 renderSourceDistributionChart(data.source_distribution || []);
 
-                dashboardLatestItems = Object.assign({ all: data.latest || [] }, data.latest_by_type || {});
+                dashboardLatestItems = Object.assign({all: data.latest || []}, data.latest_by_type || {});
                 setLatestFilter(dashboardLatestType);
 
                 const resizeCharts = () => {
@@ -1016,8 +1016,7 @@
 </script>
 
 <!-- 页脚 -->
-<footer
-    style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
     <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。
     </p>
 </footer>

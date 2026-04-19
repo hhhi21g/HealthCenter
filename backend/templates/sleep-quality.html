@@ -30,14 +30,14 @@
             flex: 1 1 auto;
             min-height: 0;
             overflow: hidden;
-            padding: 10px 18px;
+            padding: 30px 18px;
         }
 
         .content {
             display: flex;
             justify-content: center;
             align-items: stretch;
-            height: 100%;
+            height: calc(100% - 24px);
             min-height: 0;
             max-width: 1460px;
             width: 100%;
@@ -53,10 +53,11 @@
             max-height: 100%;
             min-height: 0;
             overflow: hidden;
-            padding: 18px 24px;
+            padding: 18px 38px 44px;
+            position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: flex-end;
         }
 
         .info-sidebar {
@@ -106,6 +107,14 @@
             font-size: 1.72rem;
         }
 
+        .calculator-container h1 {
+            font-size: 1.9rem;
+            margin-bottom: 8px;
+            position: absolute;
+            top: 24px;
+            left: 38px;
+        }
+
         h1::after {
             content: '';
             position: absolute;
@@ -140,12 +149,21 @@
             vertical-align: top;
         }
 
+        .calculator-container .input-group {
+            margin-bottom: 2px;
+        }
+
         label {
             display: block;
             margin-bottom: 4px;
             font-weight: 600;
             color: #2c3e50;
             font-size: 0.94rem;
+        }
+
+        .calculator-container label {
+            margin-bottom: 2px;
+            font-size: 1.02rem;
         }
 
         input, select {
@@ -156,6 +174,14 @@
             font-size: 0.95rem;
             transition: all 0.3s ease;
             background: #f8fafc;
+        }
+
+        .calculator-container input,
+        .calculator-container select {
+            height: 44px;
+            padding: 10px 12px;
+            font-size: 1.02rem;
+            line-height: 1.2;
         }
 
         input:focus, select:focus {
@@ -179,6 +205,14 @@
             margin-top: 10px;
         }
 
+        .calculator-container button {
+            padding: 12px;
+            margin-top: 4px;
+            font-size: 1.05rem;
+            position: relative;
+            top: 12px;
+        }
+
         button:hover {
             background: linear-gradient(to right, #1a4a84, #2472b9);
             transform: translateY(-2px);
@@ -186,13 +220,13 @@
         }
 
         .result-container {
-            margin-top: 12px;
-            padding: 14px 18px;
+            margin-top: 44px;
+            padding: 6px 18px;
             background: #f8faff;
             border-radius: 10px;
             text-align: center;
             border: 1px solid #e1e8f0;
-            min-height: 0;
+            min-height: 286px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -209,14 +243,14 @@
         .score-status {
             font-size: 0.95rem;
             font-weight: 600;
-            margin-top: 6px;
+            margin-top: 4px;
             padding: 6px 14px;
             border-radius: 30px;
             display: inline-block;
         }
 
         .sleep-scale-panel {
-            margin-top: 12px;
+            margin-top: 6px;
             text-align: left;
         }
 
@@ -343,7 +377,7 @@
             color: #66788a;
             font-size: 0.8rem;
             line-height: 1.3;
-            margin-top: 6px;
+            margin-top: 12px;
             text-align: center;
         }
 
@@ -416,6 +450,14 @@
             flex-wrap: wrap;
             justify-content: space-between;
             margin-bottom: 2px;
+        }
+
+        .calculator-container .input-row {
+            margin-bottom: 0;
+        }
+
+        .calculator-container .input-row:not(:nth-of-type(3)) {
+            margin-bottom: 10px;
         }
 
         .medical-footer {
