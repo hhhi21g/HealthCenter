@@ -7,7 +7,8 @@ import pymysql
 
 
 BASE_DIR = Path(__file__).resolve().parent
-DEFAULT_DATA_PATH = BASE_DIR / "static" / "data" / "disease_map.json"
+PROJECT_ROOT = BASE_DIR.parent
+DEFAULT_DATA_PATH = PROJECT_ROOT / "frontend" / "static" / "data" / "disease_map.json"
 
 
 def get_db_connection():
@@ -196,7 +197,7 @@ def main():
     parser.add_argument(
         "--json",
         default=str(DEFAULT_DATA_PATH),
-        help="Path to disease_map.json. Defaults to backend/static/data/disease_map.json.",
+        help="Path to disease_map.json. Defaults to frontend/static/data/disease_map.json.",
     )
     args = parser.parse_args()
 

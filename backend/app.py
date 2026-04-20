@@ -16,6 +16,14 @@ from torchvision import transforms, models
 import torch.nn as nn
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.dirname(BASE_DIR)
+FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
+TEMPLATE_DIR = os.path.join(FRONTEND_DIR, "templates")
+STATIC_DIR = os.path.join(FRONTEND_DIR, "static")
+MODELS_DIR = os.path.join(BASE_DIR, "models")
+
+
 def load_env_file(env_path):
     if not os.path.exists(env_path):
         return
@@ -32,7 +40,7 @@ def load_env_file(env_path):
                 os.environ.setdefault(key, value)
 
 
-load_env_file(os.path.join(os.path.dirname(__file__), '.env'))
+load_env_file(os.path.join(BASE_DIR, '.env'))
 
 try:
     from zoneinfo import ZoneInfo
@@ -40,7 +48,12 @@ except ImportError:
     ZoneInfo = None
 
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder=TEMPLATE_DIR,
+    static_folder=STATIC_DIR,
+    static_url_path='/static',
+)
 DB_HOST = os.getenv('DB_HOST', '127.0.0.1')
 DB_PORT = int(os.getenv('DB_PORT', '3306'))
 DB_USER = os.getenv('DB_USER', 'healthapp')
@@ -60,13 +73,13 @@ if ZoneInfo:
 else:
     APP_TIMEZONE = timezone(timedelta(hours=8))
 
-UPLOAD_FOLDER = 'static\\uploads'
+UPLOAD_FOLDER = os.path.join(STATIC_DIR, 'uploads')
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev_default_key')
 
 # 设置保存图片的静态目录
-GENERATED_DIR = os.path.join("static", "generated")
+GENERATED_DIR = os.path.join(STATIC_DIR, "generated")
 os.makedirs(GENERATED_DIR, exist_ok=True)
 DISEASE_MAP_DATA_PATH = os.path.join(app.static_folder, 'data', 'disease_map.json')
 DISEASE_MAP_UPDATED_AT = "2026-04-13"
@@ -2469,7 +2482,7 @@ def chest_diagnosis():
     global model_chest
     if 'model_chest' not in globals():
         model_chest = models.resnet18(num_classes=14)
-        model_chest.load_state_dict(torch.load('models/chest_model.pth', map_location='cpu'))
+        model_chest.load_state_dict(torch.load(os.path.join(MODELS_DIR, 'chest_model.pth'), map_location='cpu'))
         model_chest.eval()
 
     if request.method == 'POST':
@@ -2547,14 +2560,14 @@ def diabetes_diagnosis():
     global diabetes_model
     if 'diabetes_model' not in globals():
         diabetes_model = DiabetesNet()
-        diabetes_model.load_state_dict(torch.load("models/diabetes_model.pth", map_location='cpu'))
+        diabetes_model.load_state_dict(torch.load(os.path.join(MODELS_DIR, "diabetes_model.pth"), map_location='cpu'))
         diabetes_model.eval()
 
     # 加载标准化器
     global diabetes_scaler
     if 'diabetes_scaler' not in globals():
         import joblib
-        diabetes_scaler = joblib.load("models/diabetes_scaler.pkl")
+        diabetes_scaler = joblib.load(os.path.join(MODELS_DIR, "diabetes_scaler.pkl"))
 
     if request.method == 'POST':
         try:
@@ -2617,7 +2630,7 @@ def heart_diagnosis():
     # 模型加载（只加载一次）
     global heart_pipeline
     if 'heart_pipeline' not in globals():
-        heart_pipeline = joblib.load('models/heart_disease_model.pkl')  # 路径按你实际情况修改
+        heart_pipeline = joblib.load(os.path.join(MODELS_DIR, 'heart_disease_model.pkl'))
 
     if request.method == 'POST':
         try:
