@@ -1,0 +1,1068 @@
+{% extends "base.html" %}
+{% block title %}个人中心{% endblock %}
+{% block content %}
+
+<style>
+    body {
+        display: flex;
+        flex-direction: column;
+        font-family: sans-serif;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        background: #f5f5f5;
+    }
+
+    .content {
+        display: flex;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: hidden;
+    }
+
+    .profile-page {
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        width: 100%;
+    }
+
+    .page-header {
+        align-items: center;
+        display: flex;
+        gap: 1em;
+        justify-content: space-between;
+        margin: 0.55em 3em 0.35em 2em;
+        flex: 0 0 auto;
+    }
+
+    h1 {
+        color: #007acc;
+        font-size: 1.65rem;
+        margin: 0;
+    }
+
+    .profile-content {
+        align-items: stretch;
+        display: flex;
+        flex: 1 1 auto;
+        gap: 1.2em;
+        margin: 0 3em 0.55em 2em;
+        min-height: 0;
+    }
+
+    .profile-info-panel {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        display: flex;
+        flex: 0 0 320px;
+        flex-direction: column;
+        justify-content: center;
+        min-height: 0;
+        padding: 0.9em;
+    }
+
+    .profile-form {
+        align-content: space-between;
+        display: grid;
+        flex: 1 1 auto;
+        gap: 0.36em;
+        grid-template-rows: repeat(8, minmax(0, auto)) auto auto;
+        min-height: 0;
+    }
+
+    .profile-form label {
+        color: #333;
+        display: grid;
+        font-size: 0.8rem;
+        font-weight: 700;
+        gap: 0.2em;
+    }
+
+    .profile-form input,
+    .profile-form select {
+        border: 1px solid #d6e4ef;
+        border-radius: 6px;
+        box-sizing: border-box;
+        color: #333;
+        font-size: 0.86rem;
+        min-width: 0;
+        padding: 0.34em 0.6em;
+        width: 100%;
+    }
+
+    .profile-form input:focus,
+    .profile-form select:focus {
+        border-color: #007acc;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 122, 204, 0.12);
+    }
+
+    .profile-bp-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65em;
+    }
+
+    .profile-save-button {
+        background: #007acc;
+        border: none;
+        border-radius: 6px;
+        color: #fff;
+        cursor: pointer;
+        font-size: 0.86rem;
+        font-weight: 700;
+        margin-top: 0.15em;
+        padding: 0.46em 1em;
+    }
+
+    .profile-save-button:hover {
+        background: #005fa3;
+    }
+
+    .profile-form-status {
+        color: #607486;
+        font-size: 0.72rem;
+        line-height: 1.3;
+        min-height: 1.3em;
+    }
+
+    .profile-form-status.error {
+        color: #c92a2a;
+    }
+
+    .profile-form-status.success {
+        color: #1b7f3a;
+    }
+
+    .profile-chart-grid {
+        display: grid;
+        flex: 1 1 auto;
+        gap: 1em;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        min-height: 0;
+        width: 100%;
+    }
+
+    .profile-chart-card {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: hidden;
+        padding: 0.8em;
+    }
+
+    .profile-chart-title {
+        color: #1e5799;
+        flex: 0 0 auto;
+        font-size: 0.98rem;
+        font-weight: 800;
+        margin-bottom: 0.16em;
+    }
+
+    .profile-chart-subtitle {
+        color: #607486;
+        flex: 0 0 auto;
+        font-size: 0.74rem;
+        line-height: 1.25;
+        min-height: 2em;
+    }
+
+    .profile-chart {
+        flex: 1 1 auto;
+        height: auto;
+        margin-top: 0.25em;
+        min-height: 0;
+        width: 100%;
+    }
+
+    .profile-sleep-heatmap {
+        box-sizing: border-box;
+        flex: 1 1 auto;
+        min-height: 0;
+        margin-top: 0.25em;
+        overflow: hidden;
+        padding-top: 0.2em;
+        width: 100%;
+    }
+
+    .sleep-calendar-toolbar {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.65em;
+        position: relative;
+    }
+
+    .sleep-calendar-month {
+        color: #1f2d3d;
+        font-size: 0.95rem;
+        font-weight: 800;
+        left: 50%;
+        position: absolute;
+        transform: translateX(-50%);
+    }
+
+    .sleep-calendar-sample {
+        align-items: center;
+        color: #40556a;
+        display: flex;
+        font-size: 0.78rem;
+        font-weight: 700;
+        gap: 0.4em;
+        min-height: 28px;
+    }
+
+    .sleep-calendar-sample .sleep-heatmap-cell {
+        flex: 0 0 auto;
+        font-size: 0;
+        height: 14px;
+        width: 14px;
+    }
+
+    .sleep-calendar-nav {
+        align-items: center;
+        display: flex;
+        gap: 0.35em;
+        margin-left: auto;
+    }
+
+    .sleep-calendar-nav button {
+        background: #f3f7fb;
+        border: 1px solid #d6e4ef;
+        border-radius: 6px;
+        color: #1e5799;
+        cursor: pointer;
+        font-size: 1rem;
+        height: 28px;
+        line-height: 1;
+        padding: 0;
+        width: 28px;
+    }
+
+    .sleep-calendar-nav button:hover {
+        background: #e9f3fb;
+    }
+
+    .sleep-heatmap-weekdays,
+    .sleep-heatmap-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+        margin: 0 auto;
+        max-width: 226px;
+    }
+
+    .sleep-heatmap-weekdays {
+        color: #607486;
+        font-size: 0.78rem;
+        margin-bottom: 0.55em;
+        text-align: center;
+    }
+
+    .sleep-heatmap-grid {
+        width: 100%;
+    }
+
+    .sleep-heatmap-cell {
+        align-items: center;
+        aspect-ratio: 1 / 1;
+        background: #ebedf0;
+        border-radius: 4px;
+        color: #4f5f6f;
+        display: flex;
+        font-size: 0.68rem;
+        justify-content: center;
+        min-width: 0;
+        width: 100%;
+    }
+
+    .sleep-heatmap-cell.level-1 {
+        background: #c6eecf;
+    }
+
+    .sleep-heatmap-cell.level-2 {
+        background: #88d99a;
+    }
+
+    .sleep-heatmap-cell.level-3 {
+        background: #45b85c;
+    }
+
+    .sleep-heatmap-cell.level-4 {
+        background: #269c43;
+    }
+
+    .sleep-heatmap-cell.today {
+        box-shadow: 0 0 0 3px #0f5132;
+    }
+
+    .sleep-heatmap-legend {
+        align-items: center;
+        color: #607486;
+        display: flex;
+        gap: 0.45em;
+        font-size: 0.78rem;
+        justify-content: flex-end;
+        margin-top: 0.45em;
+    }
+
+    .sleep-heatmap-legend .sleep-heatmap-cell {
+        flex: 0 0 auto;
+        height: 13px;
+        width: 13px;
+    }
+
+    .profile-chart-status {
+        color: #607486;
+        font-size: 0.95rem;
+        padding: 2em 1em;
+        text-align: center;
+    }
+
+    .profile-footer {
+        background-color: #f8f8f8;
+        color: #555;
+        flex: 0 0 auto;
+        font-size: 0.82rem;
+        line-height: 1.35;
+        padding: 0.55em 2em;
+        text-align: center;
+    }
+
+    .profile-footer p {
+        margin: 0;
+    }
+
+    .profile-chart-status.error {
+        color: #c92a2a;
+    }
+
+    @media (max-width: 900px) {
+        .profile-content {
+            flex-direction: column;
+            margin: 1.5em 2em 0;
+        }
+
+        .profile-info-panel,
+        .profile-chart-grid {
+            flex-basis: auto;
+            width: 100%;
+        }
+
+        .profile-chart-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="profile-page">
+    <div class="page-header">
+        <h1>个人中心</h1>
+    </div>
+
+    <div class="profile-content">
+        <section class="profile-info-panel">
+            <form class="profile-form" id="profile-info-form">
+                <label>
+                    个人身高（cm）
+                    <input id="profile-height" name="height_cm" type="number" min="50" max="250" step="0.1"
+                        placeholder="例如 170">
+                </label>
+                <label>
+                    体重（kg）
+                    <input id="profile-weight" name="weight_kg" type="number" min="10" max="300" step="0.1"
+                        placeholder="例如 65">
+                </label>
+                <label>
+                    心率（次/分钟）
+                    <input id="profile-heart-rate" name="heart_rate_bpm" type="number" min="30" max="220" step="1"
+                        placeholder="例如 75">
+                </label>
+                <label>
+                    血压（mmHg）
+                    <div class="profile-bp-row">
+                        <input id="profile-systolic" name="systolic_pressure" type="number" min="60" max="260" step="1"
+                            placeholder="收缩压">
+                        <input id="profile-diastolic" name="diastolic_pressure" type="number" min="30" max="160"
+                            step="1" placeholder="舒张压">
+                    </div>
+                </label>
+                <label>
+                    睡眠时长（小时）
+                    <input id="profile-sleep" name="sleep_hours" type="number" min="0" max="24" step="0.1"
+                        placeholder="例如 7.5">
+                </label>
+                <label>
+                    是否具有胸部疾病史
+                    <select id="profile-chest-history" name="has_chest_disease_history">
+                        <option value="">未填写</option>
+                        <option value="0">否</option>
+                        <option value="1">有</option>
+                    </select>
+                </label>
+                <label>
+                    是否具有心脏病史
+                    <select id="profile-heart-history" name="has_heart_disease_history">
+                        <option value="">未填写</option>
+                        <option value="0">否</option>
+                        <option value="1">有</option>
+                    </select>
+                </label>
+                <label>
+                    是否具有糖尿病史
+                    <select id="profile-diabetes-history" name="has_diabetes_history">
+                        <option value="">未填写</option>
+                        <option value="0">否</option>
+                        <option value="1">有</option>
+                    </select>
+                </label>
+                <button class="profile-save-button" type="submit">保存信息</button>
+                <div class="profile-form-status" id="profile-form-status">正在读取个人信息...</div>
+            </form>
+        </section>
+        <section class="profile-chart-grid">
+            <div class="profile-chart-card">
+                <div class="profile-chart-title">心率趋势</div>
+                <div class="profile-chart-subtitle">最近保存的心率记录，以圆滑折线展示。</div>
+                <div class="profile-chart-status" id="heart-rate-status">正在加载心率趋势...</div>
+                <div class="profile-chart" id="heart-rate-chart" style="display: none;"></div>
+            </div>
+            <div class="profile-chart-card">
+                <div class="profile-chart-title">健康风险雷达图</div>
+                <div class="profile-chart-subtitle">悬停在雷达图上可查看每项健康情况。</div>
+                <div class="profile-chart-status" id="profile-radar-status">正在加载健康画像...</div>
+                <div class="profile-chart" id="profile-radar-chart" style="display: none;"></div>
+            </div>
+            <div class="profile-chart-card">
+                <div class="profile-chart-title">血压趋势</div>
+                <div class="profile-chart-subtitle">最近保存的收缩压和舒张压记录。</div>
+                <div class="profile-chart-status" id="blood-pressure-status">正在加载血压趋势...</div>
+                <div class="profile-chart" id="blood-pressure-chart" style="display: none;"></div>
+            </div>
+            <div class="profile-chart-card">
+                <div class="profile-chart-title">睡眠时长热力图</div>
+                <div class="profile-chart-subtitle">以本月日历热力图展示每日睡眠时长。</div>
+                <div class="profile-chart-status" id="sleep-heatmap-status">正在加载睡眠热力图...</div>
+                <div class="profile-sleep-heatmap" id="sleep-heatmap-chart" style="display: none;"></div>
+            </div>
+        </section>
+    </div>
+    <footer class="profile-footer">
+        <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。
+        </p>
+    </footer>
+</div>
+
+<script>
+    (function () {
+        const ECHARTS_SRC = '/static/vendor/echarts.min.js';
+        const ECHARTS_SCRIPT_ID = 'health-radar-script';
+        let profileRadarChart = null;
+        let heartRateChart = null;
+        let bloodPressureChart = null;
+        let activeSleepMonth = null;
+
+        const profileFields = {
+            height_cm: 'profile-height',
+            weight_kg: 'profile-weight',
+            heart_rate_bpm: 'profile-heart-rate',
+            systolic_pressure: 'profile-systolic',
+            diastolic_pressure: 'profile-diastolic',
+            sleep_hours: 'profile-sleep',
+            has_chest_disease_history: 'profile-chest-history',
+            has_heart_disease_history: 'profile-heart-history',
+            has_diabetes_history: 'profile-diabetes-history'
+        };
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatMonthParam(dateValue) {
+            const year = dateValue.getFullYear();
+            const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+            return `${year}-${month}`;
+        }
+
+        function parseMonthDate(monthText) {
+            const [year, month] = monthText.split('-').map(Number);
+            return new Date(year, month - 1, 1);
+        }
+
+        function formatDateKey(dateValue) {
+            const year = dateValue.getFullYear();
+            const month = String(dateValue.getMonth() + 1).padStart(2, '0');
+            const day = String(dateValue.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatMonthLabel(monthText) {
+            const [year, month] = monthText.split('-');
+            return `${year}年${Number(month)}月`;
+        }
+
+        function loadEcharts() {
+            if (window.echarts) {
+                return Promise.resolve();
+            }
+
+            const existing = document.getElementById(ECHARTS_SCRIPT_ID);
+            if (existing) {
+                return new Promise((resolve, reject) => {
+                    existing.addEventListener('load', resolve, { once: true });
+                    existing.addEventListener('error', reject, { once: true });
+                });
+            }
+
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.id = ECHARTS_SCRIPT_ID;
+                script.src = ECHARTS_SRC;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+
+        function setFormStatus(message, type) {
+            const status = document.getElementById('profile-form-status');
+            if (!status) {
+                return;
+            }
+
+            status.textContent = message;
+            status.classList.toggle('error', type === 'error');
+            status.classList.toggle('success', type === 'success');
+        }
+
+        function parseJsonResponse(response) {
+            return response.text().then(text => {
+                const data = text ? JSON.parse(text) : {};
+                if (!response.ok) {
+                    throw new Error(data.message || data.error || `请求失败：${response.status}`);
+                }
+                return data;
+            });
+        }
+
+        function setChartStatus(statusId, chartId, message, isError) {
+            const status = document.getElementById(statusId);
+            const chart = document.getElementById(chartId);
+            if (status) {
+                status.textContent = message;
+                status.classList.toggle('error', Boolean(isError));
+                status.style.display = 'block';
+            }
+            if (chart) {
+                chart.style.display = 'none';
+            }
+        }
+
+        function showChart(chartId, statusId) {
+            const chart = document.getElementById(chartId);
+            const status = document.getElementById(statusId);
+            if (status) {
+                status.style.display = 'none';
+            }
+            if (chart) {
+                chart.style.display = 'block';
+            }
+            return chart;
+        }
+
+        function fillProfileForm(profile) {
+            Object.entries(profileFields).forEach(([key, id]) => {
+                const input = document.getElementById(id);
+                if (!input) {
+                    return;
+                }
+
+                const value = profile && profile[key] !== null && profile[key] !== undefined ? profile[key] : '';
+                input.value = value;
+            });
+        }
+
+        function collectProfileForm() {
+            const payload = {};
+            Object.entries(profileFields).forEach(([key, id]) => {
+                const input = document.getElementById(id);
+                payload[key] = input ? input.value.trim() : '';
+            });
+            return payload;
+        }
+
+        function loadProfileInfo() {
+            fetch('/api/profile-info')
+                .then(parseJsonResponse)
+                .then(data => {
+                    fillProfileForm(data.profile || {});
+                    const updatedAt = data.profile && data.profile.updated_at ? `，最近更新：${data.profile.updated_at}` : '';
+                    setFormStatus(`个人信息已加载${updatedAt}`, 'success');
+                })
+                .catch(error => {
+                    setFormStatus(`个人信息加载失败：${error.message}`, 'error');
+                });
+        }
+
+        function bindProfileForm() {
+            const form = document.getElementById('profile-info-form');
+            if (!form) {
+                return;
+            }
+
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                setFormStatus('正在保存个人信息...', '');
+
+                fetch('/api/profile-info', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(collectProfileForm())
+                })
+                    .then(parseJsonResponse)
+                    .then(data => {
+                        fillProfileForm(data.profile || {});
+                        const updatedAt = data.profile && data.profile.updated_at ? `，最近更新：${data.profile.updated_at}` : '';
+                        setFormStatus(`个人信息已保存${updatedAt}`, 'success');
+                        loadVitalSignCharts();
+                        loadSleepHeatmap();
+                        loadRadarData();
+                    })
+                    .catch(error => {
+                        setFormStatus(`保存失败：${error.message}`, 'error');
+                    });
+            });
+        }
+
+        function showStatus(message, isError) {
+            setChartStatus('profile-radar-status', 'profile-radar-chart', message, isError);
+        }
+
+        function renderRadar(data) {
+            const metrics = data.metrics || [];
+
+            if (!metrics.length) {
+                showStatus(data.message || '暂无可用健康画像数据。', true);
+                return;
+            }
+
+            const chartElement = showChart('profile-radar-chart', 'profile-radar-status');
+            if (!chartElement) {
+                return;
+            }
+
+            if (!profileRadarChart) {
+                profileRadarChart = echarts.init(chartElement);
+            }
+
+            profileRadarChart.setOption({
+                tooltip: {
+                    formatter: params => {
+                        return metrics.map((metric, index) => {
+                            const value = params.value[index];
+                            return `${escapeHtml(metric.label)}: ${escapeHtml(value)}<br/>${escapeHtml(metric.detail)}`;
+                        }).join('<br/><br/>');
+                    }
+                },
+                radar: {
+                    radius: '68%',
+                    center: ['50%', '52%'],
+                    indicator: metrics.map(metric => ({
+                        name: metric.label,
+                        max: 100
+                    })),
+                    splitNumber: 4,
+                    axisName: {
+                        color: '#425466',
+                        fontSize: 13
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: ['#dce7f2']
+                        }
+                    },
+                    splitArea: {
+                        areaStyle: {
+                            color: ['rgba(41,137,216,0.04)', 'rgba(64,192,87,0.05)']
+                        }
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#c9d6e4'
+                        }
+                    }
+                },
+                series: [{
+                    name: '健康状态评分',
+                    type: 'radar',
+                    data: [{
+                        value: metrics.map(metric => metric.value),
+                        name: '健康状态评分',
+                        areaStyle: {
+                            color: 'rgba(41, 137, 216, 0.24)'
+                        },
+                        lineStyle: {
+                            color: '#1e5799',
+                            width: 2.5
+                        },
+                        itemStyle: {
+                            color: '#1e5799'
+                        }
+                    }]
+                }]
+            });
+
+            setTimeout(() => profileRadarChart && profileRadarChart.resize(), 30);
+        }
+
+        function buildLineOption(title, labels, series, yAxisName, referenceLines = []) {
+            const referenceValues = referenceLines.map(line => line.yAxis);
+            const normalizedReferenceLines = referenceLines.map(line => ({
+                name: line.name || '',
+                yAxis: line.yAxis,
+                label: line.showLabel === false ? {
+                    show: false
+                } : {
+                    color: line.color || '#2f9e44',
+                    formatter: line.name || ''
+                },
+                lineStyle: {
+                    color: line.color || '#2f9e44',
+                    type: 'dashed',
+                    width: 1.5
+                }
+            }));
+
+            return {
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: series.length > 1 ? {
+                    top: 0,
+                    right: 12,
+                    textStyle: {
+                        color: '#40556a',
+                        fontSize: 11
+                    },
+                    itemWidth: 18,
+                    itemHeight: 8
+                } : undefined,
+                grid: {
+                    left: 44,
+                    right: 18,
+                    top: series.length > 1 ? 44 : 28,
+                    bottom: 36
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: labels,
+                    axisLabel: {
+                        color: '#607486'
+                    },
+                    axisLine: {
+                        lineStyle: {
+                            color: '#c9d6e4'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    name: yAxisName,
+                    min: referenceValues.length
+                        ? value => Math.floor(Math.min(value.min, ...referenceValues) * 0.95)
+                        : undefined,
+                    max: referenceValues.length
+                        ? value => Math.ceil(Math.max(value.max, ...referenceValues) * 1.05)
+                        : undefined,
+                    nameTextStyle: {
+                        color: '#607486'
+                    },
+                    axisLabel: {
+                        color: '#607486'
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: '#edf2f7'
+                        }
+                    }
+                },
+                series: series.map((item, index) => ({
+                    ...item,
+                    type: 'line',
+                    smooth: true,
+                    symbol: 'circle',
+                    symbolSize: 6,
+                    lineStyle: {
+                        width: 2.5,
+                        color: item.color
+                    },
+                    markLine: index === 0 && referenceLines.length ? {
+                        symbol: 'none',
+                        silent: true,
+                        lineStyle: {
+                            type: 'dashed',
+                            width: 1.5
+                        },
+                        data: normalizedReferenceLines
+                    } : undefined,
+                    itemStyle: {
+                        color: item.color
+                    },
+                    areaStyle: item.area ? {
+                        color: item.area
+                    } : undefined
+                }))
+            };
+        }
+
+        function renderSingleLineChart(records, config) {
+            const points = records.filter(record => record[config.key] !== null && record[config.key] !== undefined);
+            if (!points.length) {
+                setChartStatus(config.statusId, config.chartId, config.emptyMessage, false);
+                return;
+            }
+
+            const chartElement = showChart(config.chartId, config.statusId);
+            if (!chartElement) {
+                return;
+            }
+
+            if (!config.chartRef.current) {
+                config.chartRef.current = echarts.init(chartElement);
+            }
+
+            config.chartRef.current.setOption(buildLineOption(
+                config.name,
+                points.map(record => record.label),
+                [{
+                    name: config.name,
+                    data: points.map(record => record[config.key]),
+                    color: config.color,
+                    area: config.area
+                }],
+                config.yAxisName,
+                config.referenceLines
+            ));
+            setTimeout(() => config.chartRef.current && config.chartRef.current.resize(), 30);
+        }
+
+        function renderBloodPressureChart(records) {
+            const points = records.filter(record =>
+                record.systolic_pressure !== null && record.systolic_pressure !== undefined &&
+                record.diastolic_pressure !== null && record.diastolic_pressure !== undefined
+            );
+            if (!points.length) {
+                setChartStatus('blood-pressure-status', 'blood-pressure-chart', '保存血压后显示趋势图。', false);
+                return;
+            }
+
+            const chartElement = showChart('blood-pressure-chart', 'blood-pressure-status');
+            if (!chartElement) {
+                return;
+            }
+
+            if (!bloodPressureChart) {
+                bloodPressureChart = echarts.init(chartElement);
+            }
+
+            bloodPressureChart.setOption(buildLineOption(
+                '血压',
+                points.map(record => record.label),
+                [
+                    {
+                        name: '舒张压（蓝线）',
+                        data: points.map(record => record.diastolic_pressure),
+                        color: '#1e5799'
+                    },
+                    {
+                        name: '收缩压（绿线）',
+                        data: points.map(record => record.systolic_pressure),
+                        color: '#40c057'
+                    }
+                ],
+                'mmHg',
+                [
+                    { yAxis: 120, color: '#40c057', showLabel: false },
+                    { yAxis: 80, color: '#1e5799', showLabel: false }
+                ]
+            ));
+            setTimeout(() => bloodPressureChart && bloodPressureChart.resize(), 30);
+        }
+
+        function renderVitalSignCharts(data) {
+            const records = data.records || [];
+            renderSingleLineChart(records, {
+                chartId: 'heart-rate-chart',
+                statusId: 'heart-rate-status',
+                key: 'heart_rate_bpm',
+                name: '心率',
+                yAxisName: '次/分钟',
+                color: '#e03131',
+                area: 'rgba(224, 49, 49, 0.12)',
+                referenceLines: [
+                    { yAxis: 60, color: '#e03131', showLabel: false },
+                    { yAxis: 100, color: '#e03131', showLabel: false }
+                ],
+                emptyMessage: '保存心率后显示趋势图。',
+                chartRef: {
+                    get current() {
+                        return heartRateChart;
+                    },
+                    set current(value) {
+                        heartRateChart = value;
+                    }
+                }
+            });
+            renderBloodPressureChart(records);
+        }
+
+        function renderSleepHeatmap(data) {
+            const days = data.days || [];
+            const values = days.filter(day => day.sleep_hours !== null && day.sleep_hours !== undefined);
+            activeSleepMonth = parseMonthDate(data.month);
+
+            const heatmapElement = showChart('sleep-heatmap-chart', 'sleep-heatmap-status');
+            if (!heatmapElement) {
+                return;
+            }
+
+            const sleepByDate = new Map(days.map(day => [day.date, day.sleep_hours]));
+            const startDate = new Date(`${data.range[0]}T00:00:00`);
+            const endDate = new Date(`${data.range[1]}T00:00:00`);
+            const cells = [];
+
+            for (let index = 0; index < startDate.getDay(); index += 1) {
+                cells.push('<span class="sleep-heatmap-cell" aria-hidden="true"></span>');
+            }
+
+            const currentDate = new Date(startDate);
+            while (currentDate <= endDate) {
+                const dateKey = formatDateKey(currentDate);
+                const hours = sleepByDate.get(dateKey);
+                let level = 0;
+                if (hours !== null && hours !== undefined) {
+                    if (hours >= 8) {
+                        level = 4;
+                    } else if (hours >= 7) {
+                        level = 3;
+                    } else if (hours >= 6) {
+                        level = 2;
+                    } else {
+                        level = 1;
+                    }
+                }
+
+                const title = hours === null || hours === undefined
+                    ? `${dateKey}：暂无睡眠记录`
+                    : `${dateKey}：${hours} 小时`;
+                const cellClasses = ['sleep-heatmap-cell', `level-${level}`];
+                if (data.today === dateKey) {
+                    cellClasses.push('today');
+                }
+                cells.push(`<span class="${cellClasses.join(' ')}" title="${escapeHtml(title)}">${currentDate.getDate()}</span>`);
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            heatmapElement.innerHTML = `
+                <div class="sleep-calendar-toolbar">
+                    <div class="sleep-calendar-sample">
+                        <span class="sleep-heatmap-cell level-4" aria-hidden="true"></span>
+                        <span>8小时</span>
+                    </div>
+                    <div class="sleep-calendar-month">${escapeHtml(formatMonthLabel(data.month))}</div>
+                    <div class="sleep-calendar-nav">
+                        <button type="button" data-month-step="-1" aria-label="上个月">&lt;</button>
+                        <button type="button" data-month-step="1" aria-label="下个月">&gt;</button>
+                    </div>
+                </div>
+                <div class="sleep-heatmap-weekdays">
+                    <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+                </div>
+                <div class="sleep-heatmap-grid">${cells.join('')}</div>
+                <div class="sleep-heatmap-legend">
+                    <span>少</span>
+                    <span class="sleep-heatmap-cell" aria-hidden="true"></span>
+                    <span class="sleep-heatmap-cell level-1" aria-hidden="true"></span>
+                    <span class="sleep-heatmap-cell level-2" aria-hidden="true"></span>
+                    <span class="sleep-heatmap-cell level-3" aria-hidden="true"></span>
+                    <span class="sleep-heatmap-cell level-4" aria-hidden="true"></span>
+                    <span>多</span>
+                </div>
+            `;
+
+            heatmapElement.querySelectorAll('[data-month-step]').forEach(button => {
+                button.addEventListener('click', () => {
+                    activeSleepMonth.setMonth(activeSleepMonth.getMonth() + Number(button.dataset.monthStep));
+                    loadSleepHeatmap();
+                });
+            });
+        }
+
+        function loadRadarData() {
+            return loadEcharts()
+                .then(() => fetch('/api/health-risk-radar'))
+                .then(parseJsonResponse)
+                .then(renderRadar)
+                .catch(error => {
+                    showStatus(`健康画像加载失败：${error.message}`, true);
+                });
+        }
+
+        function loadVitalSignCharts() {
+            return loadEcharts()
+                .then(() => fetch('/api/vital-sign-records?limit=20'))
+                .then(parseJsonResponse)
+                .then(renderVitalSignCharts)
+                .catch(error => {
+                    setChartStatus('heart-rate-status', 'heart-rate-chart', `心率趋势加载失败：${error.message}`, true);
+                    setChartStatus('blood-pressure-status', 'blood-pressure-chart', `血压趋势加载失败：${error.message}`, true);
+                });
+        }
+
+        function loadSleepHeatmap() {
+            const monthParam = activeSleepMonth ? formatMonthParam(activeSleepMonth) : '';
+            const url = monthParam
+                ? `/api/sleep-calendar?month=${encodeURIComponent(monthParam)}`
+                : '/api/sleep-calendar';
+            return loadEcharts()
+                .then(() => fetch(url))
+                .then(parseJsonResponse)
+                .then(renderSleepHeatmap)
+                .catch(error => {
+                    setChartStatus('sleep-heatmap-status', 'sleep-heatmap-chart', `睡眠热力图加载失败：${error.message}`, true);
+                });
+        }
+
+        window.addEventListener('resize', () => {
+            profileRadarChart && profileRadarChart.resize();
+            heartRateChart && heartRateChart.resize();
+            bloodPressureChart && bloodPressureChart.resize();
+        });
+
+        loadRadarData();
+        loadVitalSignCharts();
+        loadSleepHeatmap();
+
+        bindProfileForm();
+        loadProfileInfo();
+    })();
+</script>
+
+{% endblock %}

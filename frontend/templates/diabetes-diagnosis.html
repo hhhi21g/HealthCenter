@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>应用-糖尿病检测</title>
+  <link rel="stylesheet" href="/static/css/navbar.css"/>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f0f8ff, #e6f2ff);
+      color: #333;
+      min-height: 100vh;
+    }
+
+    .content {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 40px 20px;
+    }
+
+    .diagnosis-container {
+      display: flex;
+      max-width: 1000px;
+      width: 100%;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(30, 87, 153, 0.2);
+      overflow: hidden;
+    }
+
+    .form-section {
+      flex: 1;
+      padding: 30px;
+    }
+
+    .info-section {
+      flex: 1;
+      background: linear-gradient(135deg, #1e5799, #2989d8);
+      color: white;
+      padding: 30px;
+    }
+
+    h1 {
+      color: #1e5799;
+      font-size: 2rem;
+      margin-bottom: 25px;
+    }
+
+    .input-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(to right, #1e5799, #2989d8);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(to right, #1a4a84, #2472b9);
+    }
+
+    .result-box {
+      margin-top: 25px;
+      padding: 20px;
+      border-radius: 10px;
+      background: #f8faff;
+      border: 1px solid #e1e8f0;
+      text-align: center;
+    }
+
+    .result-box p {
+      font-size: 1.2rem;
+      margin: 5px 0;
+    }
+
+    .info-section h2 {
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .info-section p {
+      font-size: 1rem;
+      line-height: 1.8;
+    }
+
+    @media (max-width: 900px) {
+      .diagnosis-container {
+        flex-direction: column;
+      }
+
+      .form-section,
+      .info-section {
+        padding: 25px;
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- ✅ 顶部导航栏 -->
+<div class="navbar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="logo">健康大数据门户</div>
+
+        {% if session.get('username') and has_health_risk %}
+        <div class="health-alert" title="检测结果异常">
+            ⚠️ 健康预警：
+            {% set issues = [] %}
+            {% if user_status.chest_result != '无病' %}
+            {% set _ = issues.append('胸部疾病') %}
+            {% endif %}
+            {% if user_status.diabetes_result == 1 %}
+            {% set _ = issues.append('糖尿病') %}
+            {% endif %}
+            {% if user_status.heart_result == 1 %}
+            {% set _ = issues.append('心脏病') %}
+            {% endif %}
+            {{ issues | join('、') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 40px;">
+        <div class="nav-links">
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/news">新闻中心</a></li>
+                <li><a href="/notice">通知公告</a></li>
+                <li><a href="/application">应用中心</a></li>
+                <li><a href="/policy">卫生政策</a></li>
+                <li><a href="/knowledge">健康知识</a></li>
+                <li><a href="/about">关于我们</a></li>
+            </ul>
+        </div>
+
+        <div class="auth-section">
+            {% if session.get('username') %}
+            <a class="user-info" href="/profile" style="color: #fff; text-decoration: none; border: none; padding: 0; font-weight: 500; position: relative; display: inline-block; cursor: pointer;">欢迎，{{ session['username'] }}</a>
+            {% else %}
+            <div style="display: flex; gap: 10px;">
+                <a href="/login">登录</a>
+                <a href="/register">注册</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+
+<div class="content">
+  <div class="diagnosis-container">
+    <div class="form-section">
+      <h1>糖尿病风险评估</h1>
+      <form method="POST">
+        <div class="input-group">
+          <label>怀孕次数（Pregnancies）</label>
+          <input type="number" name="Pregnancies" required />
+        </div>
+        <div class="input-group">
+          <label>葡萄糖浓度（Glucose）</label>
+          <input type="number" name="Glucose" required />
+        </div>
+        <div class="input-group">
+          <label>血压（Blood Pressure）</label>
+          <input type="number" name="BloodPressure" required />
+        </div>
+        <div class="input-group">
+          <label>皮褶厚度（Skin Thickness）</label>
+          <input type="number" name="SkinThickness" required />
+        </div>
+        <div class="input-group">
+          <label>胰岛素水平（Insulin）</label>
+          <input type="number" name="Insulin" required />
+        </div>
+        <div class="input-group">
+          <label>体质指数 BMI</label>
+          <input type="number" step="0.1" name="BMI" required />
+        </div>
+        <div class="input-group">
+          <label>家族糖尿病指数（DPF）</label>
+          <input type="number" step="0.001" name="DiabetesPedigreeFunction" required />
+        </div>
+        <div class="input-group">
+          <label>年龄（Age）</label>
+          <input type="number" name="Age" required />
+        </div>
+        <button type="submit">提交检测</button>
+      </form>
+
+      {% if result %}
+      <div class="result-box">
+        <p><strong>预测结果：</strong> {{ result.label }}</p>
+        <p><strong>置信度：</strong> {{ result.confidence }}%</p>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="info-section">
+      <h2>糖尿病小知识</h2>
+      <p>
+        糖尿病是一种以高血糖为特征的慢性代谢疾病，分为1型和2型糖尿病。2型糖尿病通常与遗传、饮食、肥胖、缺乏运动等有关。
+      </p>
+      <p>
+        常见症状包括：频繁口渴、多尿、体重下降、疲劳等。本检测基于体征指标估算糖尿病风险，仅供参考，建议结合医生检查结果综合判断。
+      </p>
+    </div>
+  </div>
+</div>
+<!-- ✅ 医学声明页脚 -->
+<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+    <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。</p>
+</footer>
+
+</body>
+</html>

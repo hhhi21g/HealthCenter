@@ -14,8 +14,33 @@ FLUSH PRIVILEGES;
 
 **运行：**
 
-```sql
-cd HealthCenter/backend
-python app.py
+```powershell
+# 环境配置
+conda create -n healthcenter python=3.10 -y
+conda activate healthcenter
+pip install -r requirements.txt
 ```
 
+```powershell
+cd HealthCenter
+python backend/app.py
+```
+
+```powershell
+# 网页搜索
+http://127.0.0.1:5000/
+```
+
+- `frontend/templates`：Flask 页面模板
+- `frontend/static`：CSS、JS、图片、地图数据、上传文件等静态资源
+- `backend`：Flask 接口、业务逻辑、模型文件和数据导入脚本
+
+****
+
+**登录：**
+
+用户名：test
+
+密码：testtest
+
+****

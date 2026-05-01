@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>应用中心</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="stylesheet" href="/static/css/navbar.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            color: #007acc;
+            margin: 2em 2em 1em;
+            font-size: 1.8em;
+        }
+
+        .app-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2em;
+            margin: 2em;
+        }
+
+        .app-item {
+            background: white;
+            width: 180px;
+            height: 180px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            padding: 1.2em 0.5em;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .app-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 14px rgba(0, 122, 204, 0.2);
+        }
+
+        .app-item img {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 0.8em;
+        }
+
+        .app-item div {
+            font-weight: bold;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .app-item a {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <div style="display: flex; align-items: center; gap: 20px;">
+        <div class="logo">健康大数据门户</div>
+
+        {% if session.get('username') and has_health_risk %}
+        <div class="health-alert" title="检测结果异常">
+            ⚠️ 健康预警：
+            {% set issues = [] %}
+            {% if user_status.chest_result != '无病' %}
+            {% set _ = issues.append('胸部疾病') %}
+            {% endif %}
+            {% if user_status.diabetes_result == 1 %}
+            {% set _ = issues.append('糖尿病') %}
+            {% endif %}
+            {% if user_status.heart_result == 1 %}
+            {% set _ = issues.append('心脏病') %}
+            {% endif %}
+            {{ issues | join('、') }}
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 40px;">
+        <div class="nav-links">
+            <ul>
+                <li><a href="/">首页</a></li>
+                <li><a href="/news">新闻中心</a></li>
+                <li><a href="/notice">通知公告</a></li>
+                <li><a href="/application">应用中心</a></li>
+                <li><a href="/policy">卫生政策</a></li>
+                <li><a href="/knowledge">健康知识</a></li>
+                <li><a href="/about">关于我们</a></li>
+            </ul>
+        </div>
+
+        <div class="auth-section">
+            {% if session.get('username') %}
+            <a class="user-info" href="/profile" style="color: #fff; text-decoration: none; border: none; padding: 0; font-weight: 500; position: relative; display: inline-block; cursor: pointer;">欢迎，{{ session['username'] }}</a>
+            {% else %}
+            <div style="display: flex; gap: 10px;">
+                <a href="/login">登录</a>
+                <a href="/register">注册</a>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<h1>应用中心</h1>
+
+<!-- 应用图标卡片 -->
+<div class="app-container">
+    <div class="app-item">
+        <a href="/bmi">
+            <img src="{{ url_for('static', filename='icons/bmi.png') }}" alt="BMI计算器">
+            <div>BMI计算器</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/water-intake">
+            <img src="{{ url_for('static', filename='icons/water.png') }}" alt="每日饮水量计算器">
+            <div>每日饮水量计算器</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/sleep-quality">
+            <img src="{{ url_for('static', filename='icons/sleep.png') }}" alt="睡眠质量评估器">
+            <div>睡眠质量评估器</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/emergency-guide">
+            <img src="{{ url_for('static', filename='icons/emergency.png') }}" alt="紧急急救步骤指导">
+            <div>紧急急救指导</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/info-guide">
+            <img src="{{ url_for('static', filename='icons/guide.png') }}" alt="信息导览">
+            <div>信息导览</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/disease-map">
+            <img src="{{ url_for('static', filename='icons/disease-map.svg') }}" alt="疾病预防地图">
+            <div>疾病预防地图</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/chest-diagnosis">
+            <img src="{{ url_for('static', filename='icons/chest.png') }}" alt="胸部疾病诊断">
+            <div>胸部疾病诊断</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/diabetes-diagnosis">
+            <img src="{{ url_for('static', filename='icons/diabetes.png') }}" alt="糖尿病检测">
+            <div>糖尿病检测</div>
+        </a>
+    </div>
+
+    <div class="app-item">
+        <a href="/heart-diagnosis">
+            <img src="{{ url_for('static', filename='icons/heart.png') }}" alt="心脏疾病检测">
+            <div>心脏疾病检测</div>
+        </a>
+    </div>
+</div>
+<!-- ✅ 医学声明页脚 -->
+<footer style="margin-top: 60px; background-color: #f8f8f8; padding: 20px; text-align: center; font-size: 0.9rem; color: #555;">
+    <p><strong>医学声明：</strong>本网站所提供的疾病检测结果仅供参考，不能替代专业医生的诊断和建议。如有不适或健康疑虑，请及时就医。</p>
+</footer>
+
+</body>
+</html>

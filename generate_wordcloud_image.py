@@ -6,9 +6,9 @@ from wordcloud import WordCloud
 
 # 1. 数据库配置
 db_config = {
-    'host': '212.129.223.4',
-    'user': 'root',
-    'password': 'nineone4536251',
+    'host': 'localhost',
+    'user': 'healthapp',
+    'password': 'HealthApp_2026!',
     'database': 'health',
     'charset': 'utf8mb4'
 }
@@ -34,7 +34,7 @@ def extract_keywords(titles):
 # 4. 生成词云图
 def generate_wordcloud(counter, output_path='wordcloud_policy.png'):
     wc = WordCloud(
-        font_path='simhei.ttf',  # 中文字体路径，确保有 simhei.ttf
+        font_path='C:/Windows/Fonts/simhei.ttf',
         background_color='white',
         width=800,
         height=600,
@@ -43,10 +43,10 @@ def generate_wordcloud(counter, output_path='wordcloud_policy.png'):
     wc.generate_from_frequencies(counter)
     wc.to_file(output_path)
 
-    # 可选：显示图片
-    plt.imshow(wc, interpolation='bilinear')
-    plt.axis("off")
-    plt.show()
+    # 如需本地预览，可取消下面三行注释。
+    # plt.imshow(wc, interpolation='bilinear')
+    # plt.axis("off")
+    # plt.show()
 
 # 5. 主流程
 if __name__ == '__main__':
